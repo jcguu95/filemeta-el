@@ -218,12 +218,20 @@ pathname. .. ETC."
 
 (defun filemeta-add-tag-to-file-at-point ()
   (interactive)
-  (let ((tags-str (ivy-read "Enter tags: " nil)) ;; TODO read candidates from a tag db
-        (tags (mapcar #'intern (split-string (s-collapse-whitespace tags-str))))) ;; tokenize the tags
+  (let ((tags-string (ivy-read "Enter tags: " nil)) ;; TODO read candidates from a tag db
+        (tags (mapcar #'intern (split-string (s-collapse-whitespace tags-string))))) ;; tokenize the tags
     (loop for tag in tags do
           (filemeta-add-tag-to-file (dired-get-filename) tag))))
 
-(defun filemeta-remove-tag-from-file-at-point () "TODO") ;use ivy to suggest which tag to remove
+(defun filemeta-remove-tag-from-file-at-point ()
+  (interactive)
+  (let* ((file (dired-get-filename))
+         (data (filemeta-for-file file))
+         (tags (filemeta-tags data))
+         (tags-string (ivy-read "Select tag to remove: " tags))
+         (tags-to-remove (mapcar #'intern (split-string (s-collapse-whitespace tags-string)))))
+    (loop for tag-to-remove in tags-to-remove do
+          (filemeta-remove-tag-from-file file tag-to-remove))))
 
-(defun filemeta-add-comment-to-file-at-point () "TODO")
+(defun filemeta-add-comment-to-file-at-point () )
 (defun filemeta-remove-comment-from-file-at-point () "TODO") ; use ivy to select which comment to remove
