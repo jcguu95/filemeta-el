@@ -206,4 +206,24 @@ pathname. .. ETC."
     (write-region (prin1-to-string data) nil data-file)
     ))
 
-(defun filemeta-add-tag-to-file-at-point () "TODO")
+(defun filemeta-for-file (file)
+  (let* ((abs-file (file-truename file))
+         (data-file (ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
+         (content (f-read-text data-file 'utf-8))
+         (data (ignore-errors (read content))))
+    data))
+(defun filemeta-for-file-at-point ()
+  (interactive)
+  (print (filemeta-for-file (dired-get-filename))))
+
+(defun filemeta-add-tag-to-file-at-point ()
+  (interactive)
+  (let ((tags-str (ivy-read "Enter tags: " nil)) ;; TODO read candidates from a tag db
+        (tags (mapcar #'intern (split-string (s-collapse-whitespace tags-str))))) ;; tokenize the tags
+    (loop for tag in tags do
+          (filemeta-add-tag-to-file (dired-get-filename) tag))))
+
+(defun filemeta-remove-tag-from-file-at-point () "TODO") ;use ivy to suggest which tag to remove
+
+(defun filemeta-add-comment-to-file-at-point () "TODO")
+(defun filemeta-remove-comment-from-file-at-point () "TODO") ; use ivy to select which comment to remove
