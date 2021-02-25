@@ -21,10 +21,17 @@
 (setq *filemeta-db-path* "/tmp/filemeta.db")
 (push filemeta-eg1 *filemeta-db*)
 (push filemeta-eg2 *filemeta-db*)
+(mkdir (setq *filemeta-root-dir* "/tmp/filemeta") t)
 
 ;;;;;; functions ;;;;;;
 
 ;; util
+(defun ensure-file-exists (file)
+  ;; https://stackoverflow.com/questions/16397259/ensure-filepath-exists-for-reading
+  (unless (file-exists-p file)
+    (make-directory (file-name-directory file) t)
+    (write-region "" nil file nil 'silent))
+  file)
 (defun filemeta-truename (filemeta)
   (file-truename (filemeta-path filemeta)))
 (defun filemeta-match-with-p ())
@@ -123,13 +130,80 @@
 ;;;        :tags '(college math career)
 ;;;        :hists nil))
 
-(defun add-filemeta-at-point ()
-  (read-file-to-db) ;; TODO
-  (push (make-filemeta
-         :path (filemeta-dired-get-file-at-point)
-         :comments (read-comment) ;; TODO learn indirect buffer
-         :tags (read-tags)        ;; TODO learn ivy-read for this.. can i select multiple?
-         :hists nil)
-        *filemeta-db*)
-  (write-db-to-file) ;; TODO
-)
+(defun filemeta-add-tag-to-file (file tag)
+  "TAG is expected to be a symbol. FILE is expected to be a
+pathname. .. ETC."
+  (let* ((abs-file (file-truename file))
+         (data-file (ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
+         (content (f-read-text data-file 'utf-8))
+         (data (ignore-errors (read content))))
+    ;; if data is empty.. create a new filemeta for it
+    ;; otherwise, add the tag for it.
+    (if (eq data nil)
+        (setf data (make-filemeta :path abs-file
+                                  :comments nil
+                                  :tags (list tag)
+                                  :hists nil))
+      (filemeta-add-tag data tag))
+    ;; and then write the result back
+    (write-region (prin1-to-string data) nil data-file)
+    ))
+
+(defun filemeta-remove-tag-from-file (file tag)
+  "TAG is expected to be a symbol. FILE is expected to be a
+pathname. .. ETC."
+  (let* ((abs-file (file-truename file))
+         (data-file (ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
+         (content (f-read-text data-file 'utf-8))
+         (data (ignore-errors (read content))))
+    ;; if data is empty.. create a new filemeta for it
+    ;; otherwise, add the tag for it.
+    (if (eq data nil)
+        (setf data (make-filemeta :path abs-file
+                                  :comments nil
+                                  :tags nil
+                                  :hists nil))
+      (filemeta-remove-tag data tag))
+    ;; and then write the result back
+    (write-region (prin1-to-string data) nil data-file)
+    ))
+
+(defun filemeta-add-comment-to-file (file comment)
+  "COMMENT is expected to be a string. FILE is expected to be a
+pathname. .. ETC."
+  (let* ((abs-file (file-truename file))
+         (data-file (ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
+         (content (f-read-text data-file 'utf-8))
+         (data (ignore-errors (read content))))
+    ;; if data is empty.. create a new filemeta for it
+    ;; otherwise, add the tag for it.
+    (if (eq data nil)
+        (setf data (make-filemeta :path abs-file
+                                  :comments (list comment)
+                                  :tags nil
+                                  :hists nil))
+      (filemeta-add-comment data comment))
+    ;; and then write the result back
+    (write-region (prin1-to-string data) nil data-file)
+    ))
+
+(defun filemeta-remove-comment-from-file (file comment)
+  "COMMENT is expected to be a string. FILE is expected to be a
+pathname. .. ETC."
+  (let* ((abs-file (file-truename file))
+         (data-file (ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
+         (content (f-read-text data-file 'utf-8))
+         (data (ignore-errors (read content))))
+    ;; if data is empty.. create a new filemeta for it
+    ;; otherwise, add the tag for it.
+    (if (eq data nil)
+        (setf data (make-filemeta :path abs-file
+                                  :comments nil
+                                  :tags nil
+                                  :hists nil))
+      (filemeta-remove-comment data comment))
+    ;; and then write the result back
+    (write-region (prin1-to-string data) nil data-file)
+    ))
+
+(defun filemeta-add-tag-to-file-at-point () "TODO")
