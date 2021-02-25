@@ -233,5 +233,10 @@ pathname. .. ETC."
     (loop for tag-to-remove in tags-to-remove do
           (filemeta-remove-tag-from-file file tag-to-remove))))
 
-(defun filemeta-add-comment-to-file-at-point () )
+(defun filemeta-add-comment-to-file-at-point ()
+  (interactive)
+  (filemeta-add-comment-to-file
+   (dired-get-filename)
+   (ivy-read "Enter a comment: " nil)))
+
 (defun filemeta-remove-comment-from-file-at-point () "TODO") ; use ivy to select which comment to remove
