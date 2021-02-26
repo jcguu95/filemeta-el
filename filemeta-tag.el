@@ -19,7 +19,7 @@ copy. FILEMETA untouched."
     (filemeta-write-filemeta-to-data-file
      (filemeta-sort-tags filemeta) data-file)))
 
-(defun filemeta-sort-tags-for-files-at-point ()
+(defun filemeta-sort-tags-for-marked-files ()
   "Deconstructively sort tags for the marked files, or the file
 at point if no files are marked."
   (interactive)
