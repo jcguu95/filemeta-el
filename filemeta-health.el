@@ -18,12 +18,11 @@
         collect data-file))
 
 (defun filemeta-health-check-db ()
-  "Return T if all data files under *FILEMETA-ROOT-DIR* are
-  healthy."
+  "Return 'HEALTHY if all data files under *FILEMETA-ROOT-DIR*
+  are healthy."
   (let ((patients (filemeta-ls-unhealthy-data-files)))
     (if (eq nil patients)
-        (message "It's healthy.")
-      (message "List of unhealthy data files:\n%s."
-               patients))))
+        (progn (message "It's healthy.") 'healthy)
+      (message "List of unhealthy data files:\n%s." patients))))
 
 (provide 'filemeta-health)
