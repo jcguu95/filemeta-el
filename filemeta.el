@@ -2,6 +2,7 @@
 
 (require 'filemeta-tag)
 (require 'filemeta-comment)
+(require 'filemeta-dired)
 (require 'filemeta-health)
 
 (defstruct filemeta
