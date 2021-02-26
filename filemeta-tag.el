@@ -49,16 +49,17 @@ of the filemeta of a single file FILE."
        (filemeta-add-tag filemeta tag))
      data-file)))
 
-(defun filemeta-add-tags-to-file-at-point ()
+(defun filemeta-add-tags-to-files-at-point ()
   "In dired-mode, ask the user to input a string STR. Tokenize
 the string to a list of tags. Deconstructively add the tags to
-the data file of the file at point."
+the data files of all the marked files, or the file at point if
+no files are marked."
   (interactive)
-  (let* ((file (dired-get-filename))
-         (str (ivy-read "Add tags: " nil)) ;; TODO read candidates from a tag db
-         (tags-to-add (filemeta-tokenize str))) ;; TODO add to multiple files?
-    (loop for tag in tags-to-add do
-          (filemeta-add-tag-to-file file tag))))
+  (let* ((str (ivy-read "Add tags: " nil)) ;; TODO read candidates from a tag db
+         (tags-to-add (filemeta-tokenize str)))
+    (loop for file in (dired-get-marked-files) do
+          (loop for tag in tags-to-add do
+                (filemeta-add-tag-to-file file tag)))))
 
 ;;; remove tags
 
