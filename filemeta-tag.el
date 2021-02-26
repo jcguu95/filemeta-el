@@ -39,13 +39,13 @@ copy. FILEMETA untouched."
 
 ;;; add tags
 
-(defun filemeta-add-tag (filemeta symbol)
-  "Functionally add SYMBOL to the tag slot of FILEMETA, without
-touching FILEMETA."
+(defun filemeta-add-tag (filemeta tag)
+  "Expect TAG to be a symbol. Functionally add TAG to the tag
+slot of FILEMETA, without touching FILEMETA."
   (let ((result (copy-filemeta filemeta)))
-    (if (symbolp symbol)
-        (cl-pushnew symbol (filemeta-tags result))
-      (error "SYMBOL must be a symbol."))
+    (if (symbolp tag)
+        (cl-pushnew tag (filemeta-tags result))
+      (error "TAG must be a symbol."))
     result))
 
 (defun filemeta-add-tag-to-file (file tag)
@@ -55,34 +55,43 @@ of the filemeta of a single file FILE."
          (filemeta (filemeta-filemeta-from-data-file data-file)))
     (filemeta-write-filemeta-to-data-file
      (if (eq filemeta nil)
-         (make-filemeta :path abs-file :comments nil
+         (make-filemeta :path (file-truename file) :comments nil
                         :tags (list tag) :hists nil)
        (filemeta-add-tag filemeta tag))
      data-file)))
-
-(defun filemeta-tokenize (str)
-  "A utility that tokenize the input string STR into a list of
-symbols."
-  (mapcar #'intern (split-string (s-collapse-whitespace str))))
 
 (defun filemeta-add-tags-to-file-at-point ()
   "In dired-mode, ask the user to input a string STR. Tokenize
 the string to a list of tags. Deconstructively add the tags to
 the data file of the file at point."
-  ;; TODO add to multiple files?
   (interactive)
   (let* ((str (ivy-read "Add tags: " nil)) ;; TODO read candidates from a tag db
          (tags (filemeta-tokenize str))
-         (file (dired-get-filename)))
+         (file (dired-get-filename))) ;; TODO add to multiple files?
     (loop for tag in tags do
           (filemeta-add-tag-to-file file tag))))
 
 ;;; remove tags
 
-(defun filemeta-remove-tag (filemeta symbol)
-  ;; e.g. (filemeta-remove-tag filemeta-eg1 'math)
-  (setf (filemeta-tags filemeta)
-        (remove symbol (filemeta-tags filemeta))))
+(defun filemeta-remove-tag (filemeta tag)
+  "Expect TAG to be a symbol. Functionally remove TAG from the
+tag slot of FILEMETA, without touching FILEMETA."
+  (let ((result (copy-filemeta filemeta)))
+    (if (symbolp tag)
+        (setf (filemeta-tags result)
+              (remove tag (filemeta-tags filemeta)))
+      (error "TAG must be a symbol."))
+    result))
+
+(defun filemeta-remove-tag-from-file (file tag)
+  "Deconstructively remove a single symbol TAG into the tags-slot
+of the filemeta of a single file FILE."
+  (let* ((data-file (filemeta-data-for-file--ensured file))
+         (filemeta (filemeta-filemeta-from-data-file data-file)))
+    (filemeta-write-filemeta-to-data-file
+     (if (eq filemeta nil) nil
+       (filemeta-remove-tag filemeta tag))
+     data-file)))
 
 (defun filemeta-remove-tag-from-file (file tag)
   "TAG is expected to be a symbol. FILE is expected to be a
@@ -102,15 +111,16 @@ pathname. .. ETC."
     ;; and then write the result back
     (write-region (prin1-to-string data) nil data-file)))
 
-(defun filemeta-remove-tag-from-file-at-point ()
-  ;; TODO add to multiple files?
+(defun filemeta-remove-tags-from-file-at-point ()
+  "In dired-mode, ask the user to input a string STR. Tokenize
+the string to a list of tags. Deconstructively remove the tags
+from the data file of the file at point."
   (interactive)
-  (let* ((file (dired-get-filename))
-         (data (filemeta-for-file file))
-         (tags (filemeta-tags data))
-         (tags-string (ivy-read "Select tag to remove: " tags))
-         (tags-to-remove (mapcar #'intern (split-string (s-collapse-whitespace tags-string)))))
-    (loop for tag-to-remove in tags-to-remove do
-          (filemeta-remove-tag-from-file file tag-to-remove))))
+  (let* ((file (dired-get-filename)) ;; TODO add to multiple files?
+         (tags (filemeta-tags (filemeta-for-file file)))
+         (str (ivy-read "Remove tags: " tags)) ;; TODO read candidates from a tag db
+         (tags-to-remove (filemeta-tokenize str)))
+    (loop for tag in tags-to-remove do
+          (filemeta-remove-tag-from-file file tag))))
 
 (provide 'filemeta-tag)
