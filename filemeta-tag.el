@@ -28,11 +28,10 @@ copy. FILEMETA untouched."
     result))
 
 (defun filemeta-sort-tags-for-file (file)
-  (let* ((abs-file (file-truename file))
-         (data-file (ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
-         (content (f-read-text data-file 'utf-8))
-         (filemeta (ignore-errors (read content))))
-    (setf filemeta (filemeta-sort-tags filemeta))))
+  "Deconstructively sort the tags for the filemeta of the FILE."
+  (let* ((data-file (filemeta-data-for-file--ensured file))
+         (filemeta (filemeta-filemeta-from-data-file data-file)))
+    (filemeta-write-filemeta-to-data-file (filemeta-sort-tags filemeta) data-file)))
 
 (defun filemeta-sort-tags-for-file-at-point ()
   (interactive)
