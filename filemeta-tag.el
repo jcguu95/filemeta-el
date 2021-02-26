@@ -49,7 +49,7 @@ of the filemeta of a single file FILE."
        (filemeta-add-tag filemeta tag))
      data-file)))
 
-(defun filemeta-add-tags-to-files-at-point ()
+(defun filemeta-add-tags-to-marked-files ()
   "In dired-mode, ask the user to input a string STR. Tokenize
 the string to a list of tags. Deconstructively add the tags to
 the data files of all the marked files, or the file at point if
@@ -101,16 +101,19 @@ pathname. .. ETC."
     ;; and then write the result back
     (write-region (prin1-to-string data) nil data-file)))
 
-(defun filemeta-remove-tags-from-file-at-point ()
+(defun filemeta-remove-tags-from-marked-files ()
   "In dired-mode, ask the user to input a string STR. Tokenize
 the string to a list of tags. Deconstructively remove the tags
 from the data file of the file at point."
   (interactive)
-  (let* ((file (dired-get-filename)) ;; TODO add to multiple files?
-         (tags (filemeta-tags (filemeta-for-file file)))
+  (let* ((marked-files (dired-get-marked-files))
+         (tags (flatten-list
+                (loop for file in marked-files collect
+                      (filemeta-tags (filemeta-for-file file)))))
          (str (ivy-read "Remove tags: " tags)) ;; TODO read candidates from a tag db
          (tags-to-remove (filemeta-tokenize str)))
-    (loop for tag in tags-to-remove do
-          (filemeta-remove-tag-from-file file tag))))
+    (loop for file in marked-files do
+          (loop for tag in tags-to-remove do
+                (filemeta-remove-tag-from-file file tag)))))
 
 (provide 'filemeta-tag)
