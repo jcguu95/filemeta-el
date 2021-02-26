@@ -1,6 +1,6 @@
 * todo-list
 
-+ [ ] More doc strings! More message output!
++ [X] More doc strings! More message output!
 + [ ] integrate with dired narrow
 + [ ] #'filemeta-undo
 + [ ] Add a nice filemeta shower.
@@ -19,3 +19,5 @@
   filemeta-tag.el by using more utils and functional programming
   techniques. Also consider add timestamps for the slot
   filemeta-comments.
++ [ ] Can I do it functionally without explicitly copy the whole
+  struct?
