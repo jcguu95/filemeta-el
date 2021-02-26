@@ -83,24 +83,6 @@ of the filemeta of a single file FILE."
        (filemeta-remove-tag filemeta tag))
      data-file)))
 
-(defun filemeta-remove-tag-from-file (file tag)
-  "TAG is expected to be a symbol. FILE is expected to be a
-pathname. .. ETC."
-  (let* ((abs-file (file-truename file))
-         (data-file (ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
-         (content (f-read-text data-file 'utf-8))
-         (data (ignore-errors (read content))))
-    ;; if data is empty.. create a new filemeta for it
-    ;; otherwise, add the tag for it.
-    (if (eq data nil)
-        (setf data (make-filemeta :path abs-file
-                                  :comments nil
-                                  :tags nil
-                                  :hists nil))
-      (filemeta-remove-tag data tag))
-    ;; and then write the result back
-    (write-region (prin1-to-string data) nil data-file)))
-
 (defun filemeta-remove-tags-from-marked-files ()
   "In dired-mode, ask the user to input a string STR. Tokenize
 the string to a list of tags. Deconstructively remove the tags
