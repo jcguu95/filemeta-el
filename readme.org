@@ -14,3 +14,8 @@
 + [ ] Automatic git the db while a destructive action is made.
 + [ ] Ask help for "mark" all files in dired that satisfy abc..
 + [ ] filemeta-history: a complete history of what has been done
++ [ ] Add unity test.
++ [ ] filemeta-comment.el should be rewritten mimicking
+  filemeta-tag.el by using more utils and functional programming
+  techniques. Also consider add timestamps for the slot
+  filemeta-comments.
