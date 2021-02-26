@@ -1,9 +1,20 @@
+;;; filemeta.el -mode -*- coding: utf-8; lexical-binding: t; -*-
+
 ;; TODO list
 ;;
 ;; 1. Separate files into smaller ones: inspect, comment, tag, utils.
 ;; 2. More doc strings! More message output!
 ;; 3. integrate with dired narrow
 ;; 4. #'filemeta-undo
+;; 5. Add a nice filemeta shower.
+;; 6. Add a tag statistics reporter.
+;; 7. Add a canonical annotating folder and org file to each file.
+;; 8. Add an org/html rendered -- eg Render an html with links and even with embedded images with all files that have tag 'x and have no tag 'y.
+;; 9. Add a db health checker/ hash checker.
+;; 10. Automatic git the db while a destructive action is made.
+;; 11. Ask help for "mark" all files in dired that satisfy abc..
+;; 12. filemeta-history: a complete history of what has been done
+
 
 ;;;;;; structures ;;;;;;
 
