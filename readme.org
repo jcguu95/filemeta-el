@@ -10,7 +10,8 @@
 + [ ] Add an org/html rendered -- eg Render an html with links
   and even with embedded images with all files that have tag 'x
   and have no tag 'y.
-+ [ ] Add a db health checker/ hash checker.
++ [X] Add a db health checker.
++ [ ] Add hash history to filemetas.
 + [ ] Automatic git the db while a destructive action is made.
 + [ ] Ask help for "mark" all files in dired that satisfy abc..
 + [ ] filemeta-history: a complete history of what has been done
