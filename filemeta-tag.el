@@ -16,9 +16,11 @@ copy. FILEMETA untouched."
   "Deconstructively sort the tags for the filemeta of the FILE."
   (let* ((data-file (filemeta-data-for-file--ensured file))
          (filemeta (filemeta-filemeta-from-data-file data-file)))
-    (filemeta-write-filemeta-to-data-file (filemeta-sort-tags filemeta) data-file)))
+    (filemeta-write-filemeta-to-data-file
+     (filemeta-sort-tags filemeta) data-file)))
 
 (defun filemeta-sort-tags-for-file-at-point ()
+  "Deconstructively sort tags for the file at point."
   (interactive)
   (filemeta-sort-tags-for-file (dired-get-filename)))
 
