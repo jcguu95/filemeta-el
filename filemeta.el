@@ -1,7 +1,8 @@
 ;;; filemeta.el -mode -*- coding: utf-8; lexical-binding: t; -*-
 
-(require 'filemeta-comment)
 (require 'filemeta-tag)
+(require 'filemeta-comment)
+(require 'filemeta-health)
 
 (defstruct filemeta
   path comments tags hists) ;; TODO add time for comments
