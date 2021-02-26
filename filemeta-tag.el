@@ -1,23 +1,33 @@
 ;;; filemeta-tag.el -mode -*- coding: utf-8; lexical-binding: t; -*-
 
-(defun filemeta-add-tag (filemeta symbol)
-  ;; e.g. (filemeta-add-tag filemeta-eg1 'math)
-  (if (symbolp symbol)
-      (cl-pushnew symbol (filemeta-tags filemeta))
-      (error "SYMBOL must be a symbol.")))
-
-(defun filemeta-remove-tag (filemeta symbol)
-  ;; e.g. (filemeta-remove-tag filemeta-eg1 'math)
-  (setf (filemeta-tags filemeta)
-        (remove symbol (filemeta-tags filemeta))))
+;;; functional
 
 (defun filemeta-show-tags (filemeta)
-  ;; e.g. (filemeta-show-tags filemeta-eg1)
   (filemeta-tags filemeta))
+
+(defun filemeta-file-has-tag-p (file tag)
+  (member tag (filemeta-tags (filemeta-for-file file))))
+
+(defun filemeta-file-has-tag-at-point-p ()
+  (interactive)
+  (let ((tag (intern (ivy-read "Enter tag: " nil))))
+    (if (filemeta-file-has-tag-p (dired-get-filename) tag)
+        (message "true")
+      (message "false"))))
+
+;;; sort tags
 
 (defun filemeta-sort-tags (filemeta)
   (setf (filemeta-tags filemeta)
         (sort (filemeta-tags filemeta) 'string<)))
+
+;;; add tags
+
+(defun filemeta-add-tag (filemeta symbol)
+  ;; e.g. (filemeta-add-tag filemeta-eg1 'math)
+  (if (symbolp symbol)
+      (cl-pushnew symbol (filemeta-tags filemeta))
+    (error "SYMBOL must be a symbol.")))
 
 (defun filemeta-add-tag-to-file (file tag)
   "TAG is expected to be a symbol. FILE is expected to be a
@@ -37,6 +47,22 @@ pathname. .. ETC."
     ;; and then write the result back
     (write-region (prin1-to-string data) nil data-file)))
 
+(defun filemeta-add-tag-to-file-at-point ()
+  ;; TODO add doc string
+  ;; TODO add to multiple files?
+  (interactive)
+  (let* ((tags-string (ivy-read "Enter tags: " nil)) ;; TODO read candidates from a tag db
+         (tags (mapcar #'intern (split-string (s-collapse-whitespace tags-string))))) ;; tokenize the tags
+    (loop for tag in tags do
+          (filemeta-add-tag-to-file (dired-get-filename) tag))))
+
+;;; remove tags
+
+(defun filemeta-remove-tag (filemeta symbol)
+  ;; e.g. (filemeta-remove-tag filemeta-eg1 'math)
+  (setf (filemeta-tags filemeta)
+        (remove symbol (filemeta-tags filemeta))))
+
 (defun filemeta-remove-tag-from-file (file tag)
   "TAG is expected to be a symbol. FILE is expected to be a
 pathname. .. ETC."
@@ -53,27 +79,7 @@ pathname. .. ETC."
                                   :hists nil))
       (filemeta-remove-tag data tag))
     ;; and then write the result back
-    (write-region (prin1-to-string data) nil data-file)
-    ))
-
-(defun filemeta-file-has-tag-p (file tag)
-  (member tag (filemeta-tags (filemeta-for-file file))))
-
-(defun filemeta-file-has-tag-at-point-p ()
-  (interactive)
-  (let ((tag (intern (ivy-read "Enter tag: " nil))))
-    (if (filemeta-file-has-tag-p (dired-get-filename) tag)
-        (message "true")
-      (message "false"))))
-
-(defun filemeta-add-tag-to-file-at-point ()
-  ;; TODO add doc string
-  ;; TODO add to multiple files?
-  (interactive)
-  (let* ((tags-string (ivy-read "Enter tags: " nil)) ;; TODO read candidates from a tag db
-         (tags (mapcar #'intern (split-string (s-collapse-whitespace tags-string))))) ;; tokenize the tags
-    (loop for tag in tags do
-          (filemeta-add-tag-to-file (dired-get-filename) tag))))
+    (write-region (prin1-to-string data) nil data-file)))
 
 (defun filemeta-remove-tag-from-file-at-point ()
   ;; TODO add to multiple files?
