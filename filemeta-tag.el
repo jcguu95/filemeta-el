@@ -6,8 +6,6 @@
   "Functionally sort the tags of FILEMETA and return a fresh
 copy. FILEMETA untouched."
   (let ((result (copy-filemeta filemeta)))
-    ;; TODO Can I do it functionally without explicitly copy the
-    ;; whole struct?
     (setf (filemeta-tags result)
           (-sort 'string< (filemeta-tags filemeta)))
     result))
@@ -92,10 +90,21 @@ from the data file of the file at point."
          (tags (-uniq (flatten-list
                        (loop for file in marked-files collect
                              (filemeta-tags (filemeta-for-file file))))))
-         (str (ivy-read "Remove tags: " tags)) ;; TODO read candidates from a tag db
+         (str (ivy-read "Remove tags: " tags))
          (tags-to-remove (filemeta-tokenize str)))
     (loop for file in marked-files do
           (loop for tag in tags-to-remove do
                 (filemeta-remove-tag-from-file file tag)))))
+
+;; stats
+
+;; testing
+(defun filemeta-ls-tags ()
+  "List all tags under *FILEMETA-ROOT*."
+  ;; TODO Take care real NILs and fake NILs.
+  (-uniq (flatten-list
+          (loop for data-file in (directory-files-recursively *filemeta-root* "")
+                collect (let ((filemeta (filemeta-filemeta-from-data-file data-file)))
+                          (when filemeta (filemeta-tags filemeta)))))))
 
 (provide 'filemeta-tag)
