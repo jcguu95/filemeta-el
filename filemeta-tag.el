@@ -98,13 +98,44 @@ from the data file of the file at point."
 
 ;; stats
 
-;; testing
 (defun filemeta-ls-tags ()
-  "List all tags under *FILEMETA-ROOT*."
+  "List all tags under *FILEMETA-ROOT-DIR*."
   ;; TODO Take care real NILs and fake NILs.
   (-uniq (flatten-list
-          (loop for data-file in (directory-files-recursively *filemeta-root* "")
+          (loop for data-file in (directory-files-recursively *filemeta-root-dir* "")
                 collect (let ((filemeta (filemeta-filemeta-from-data-file data-file)))
                           (when filemeta (filemeta-tags filemeta)))))))
+
+(defun filemeta-ls-files ()
+  "Return all files that are associated with some data files
+  under *FILEMETA-ROOT-DIR*."
+  (remove nil
+          (loop for data-file in (directory-files-recursively *filemeta-root-dir* "")
+                collect (let ((filemeta (filemeta-filemeta-from-data-file data-file)))
+                          (when filemeta (filemeta-path filemeta))))))
+
+(defun filemeta-has-tag-p (filemeta tag)
+  "Return whether FILEMETA has TAG."
+  (when (member tag (filemeta-tags filemeta)) t))
+
+(defun filemeta-has-tags-p (filemeta tags)
+  "Return whether FILEMETA has all tags in TAGS."
+  (eval (cons 'and ;; weird code cuz 'and is a macro.. can't apply it directly.
+              (loop for tag in tags collect
+                    (when (member tag (filemeta-tags filemeta)) t)))))
+
+(defun filemeta-ls-files-having-tag (tag)
+  "List all files that have tag TAG."
+  (-filter (lambda (file)
+             (filemeta-has-tag-p (filemeta-for-file file) tag))
+           (filemeta-ls-files)))
+
+(defun filemeta-ls-files-having-tags (tags)
+  "List all files that have all tags in TAGS."
+  (-filter (lambda (file)
+             (filemeta-has-tags-p (filemeta-for-file file) tags))
+           (filemeta-ls-files)))
+
+(defun filemeta-check-db-health () "TODO")
 
 (provide 'filemeta-tag)
