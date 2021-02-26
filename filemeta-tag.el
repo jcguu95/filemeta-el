@@ -18,8 +18,33 @@
 ;;; sort tags
 
 (defun filemeta-sort-tags (filemeta)
-  (setf (filemeta-tags filemeta)
-        (sort (filemeta-tags filemeta) 'string<)))
+  "Functionally sort the tags of FILEMETA and return a fresh
+copy. FILEMETA untouched."
+  (let ((result filemeta))
+    (setf (filemeta-tags result)
+          (-sort 'string< (filemeta-tags filemeta)))
+    result)) ;; FIXME it's deconstructive.. but why?
+
+;; testing
+(filemeta-sort-tags filemeta-eg1)
+(setq filemeta-eg1
+      (make-filemeta
+       :path "~/test-image/1.jpg"
+       :comments '("I love this photo.")
+       :tags '(college math career a c b)
+       :hists nil))
+;; testing
+
+(defun filemeta-sort-tags-for-file (file)
+  (let* ((abs-file (file-truename file))
+         (data-file (ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
+         (content (f-read-text data-file 'utf-8))
+         (filemeta (ignore-errors (read content))))
+    (setf filemeta (filemeta-sort-tags filemeta))))
+
+(defun filemeta-sort-tags-for-file-at-point ()
+  (interactive)
+  (filemeta-sort-tags-for-file (dired-get-filename)))
 
 ;;; add tags
 
