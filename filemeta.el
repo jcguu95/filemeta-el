@@ -1,3 +1,10 @@
+;; TODO list
+;;
+;; 1. Separate files into smaller ones: inspect, comment, tag, utils.
+;; 2. More doc strings! More message output!
+;; 3. integrate with dired narrow
+;; 4. #'filemeta-undo
+
 ;;;;;; structures ;;;;;;
 
 (defstruct filemeta
@@ -21,10 +28,9 @@
     (make-directory (file-name-directory file) t)
     (write-region "" nil file nil 'silent))
   file)
+
 (defun filemeta-truename (filemeta)
   (file-truename (filemeta-path filemeta)))
-(defun filemeta-match-with-p ())
-(defun filemeta-filter-with ())
 
 ;; comment
 (defun filemeta-add-comment (filemeta comment)
@@ -63,27 +69,6 @@
   (setf (filemeta-tags filemeta)
         (sort (filemeta-tags filemeta) 'string<)))
 
-;; hash
-(defun filemeta-update-history ())
-(defun filemeta-show-history ())
-
-;; dired
-(defun filemeta-dired-get-file-at-point ()
-  "Get the file at point."
-  (let ((file (if (derived-mode-p 'dired-mode)
-                  (dired-get-filename)
-                (buffer-file-name))))
-    file))
-
-(defun filemeta-dired-get-files-at-point ()
-  "Get the marked files at point."
-  (let ((files (if (derived-mode-p 'dired-mode)
-                   (dired-get-marked-files)
-                 (buffer-file-name))))
-    files))
-
-
-
 (defun filemeta-add-tag-to-file (file tag)
   "TAG is expected to be a symbol. FILE is expected to be a
 pathname. .. ETC."
@@ -100,8 +85,7 @@ pathname. .. ETC."
                                   :hists nil))
       (filemeta-add-tag data tag))
     ;; and then write the result back
-    (write-region (prin1-to-string data) nil data-file)
-    ))
+    (write-region (prin1-to-string data) nil data-file)))
 
 (defun filemeta-remove-tag-from-file (file tag)
   "TAG is expected to be a symbol. FILE is expected to be a
@@ -166,11 +150,25 @@ pathname. .. ETC."
          (content (f-read-text data-file 'utf-8))
          (data (ignore-errors (read content))))
     data))
+
 (defun filemeta-for-file-at-point ()
+  ;; TODO add to multiple files?
   (interactive)
   (print (filemeta-for-file (dired-get-filename))))
 
+(defun filemeta-file-has-tag-p (file tag)
+  (member tag (filemeta-tags (filemeta-for-file file))))
+
+(defun filemeta-file-has-tag-at-point-p ()
+  (interactive)
+  (let ((tag (intern (ivy-read "Enter tag: " nil))))
+    (if (filemeta-file-has-tag-p (dired-get-filename) tag)
+        (message "true")
+      (message "false"))))
+
 (defun filemeta-add-tag-to-file-at-point ()
+  ;; TODO add doc string
+  ;; TODO add to multiple files?
   (interactive)
   (let* ((tags-string (ivy-read "Enter tags: " nil)) ;; TODO read candidates from a tag db
          (tags (mapcar #'intern (split-string (s-collapse-whitespace tags-string))))) ;; tokenize the tags
@@ -178,6 +176,7 @@ pathname. .. ETC."
           (filemeta-add-tag-to-file (dired-get-filename) tag))))
 
 (defun filemeta-remove-tag-from-file-at-point ()
+  ;; TODO add to multiple files?
   (interactive)
   (let* ((file (dired-get-filename))
          (data (filemeta-for-file file))
@@ -188,12 +187,14 @@ pathname. .. ETC."
           (filemeta-remove-tag-from-file file tag-to-remove))))
 
 (defun filemeta-add-comment-to-file-at-point ()
+  ;; TODO add to multiple files?
   (interactive)
   (filemeta-add-comment-to-file
    (dired-get-filename)
    (ivy-read "Enter a comment: " nil)))
 
 (defun filemeta-remove-comment-from-file-at-point ()
+  ;; TODO add to multiple files?
   (interactive)
   (let* ((file (dired-get-filename))
          (data (filemeta-for-file file))
