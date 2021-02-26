@@ -35,3 +35,24 @@
   ;; TODO add to multiple files?
   (interactive)
   (print (filemeta-for-file (dired-get-filename))))
+
+(defun filemeta-data-for-file (file)
+  "An function utility that returns the path to the data file of
+the input FILE."
+  (concat *filemeta-root-dir* (file-truename file)))
+
+(defun filemeta-data-for-file--ensured (file)
+  "An utility that deconstructively ensures and gets the path of
+the data file for the input FILE. It creates the data file, if
+not exists yet, under *FILEMETA-ROOT-DIR* recursively."
+  (ensure-file-exists (filemeta-data-for-file file)))
+
+(defun filemeta-filemeta-from-data-file (data-file)
+  "An utility that reads the DATA-FILE and expects the content
+inside records a filemeta. If there's any error, return NIL."
+  (ignore-errors (read (f-read-text data-file 'utf-8))))
+
+(defun filemeta-write-filemeta-to-data-file (filemeta data-file)
+  "An utility that overwrites the FILEMETA to the DATAFILE."
+  (message (format "Updating %s.." data-file))
+  (write-region (prin1-to-string filemeta) nil data-file))
