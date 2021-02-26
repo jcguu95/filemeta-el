@@ -110,9 +110,13 @@ from the data file of the file at point."
   "Return all files that are associated with some data files
   under *FILEMETA-ROOT-DIR*."
   (remove nil
-          (loop for data-file in (directory-files-recursively *filemeta-root-dir* "")
+          (loop for data-file in (directory-files-recursively *filemeta-root-dir* "") ;; TODO use filemeta-ls-data-files
                 collect (let ((filemeta (filemeta-filemeta-from-data-file data-file)))
                           (when filemeta (filemeta-path filemeta))))))
+
+(defun filemeta-ls-data-files ()
+  "List all data files under *FILEMETA-ROOT-DIR*."
+  (directory-files-recursively *filemeta-root-dir* ""))
 
 (defun filemeta-has-tag-p (filemeta tag)
   "Return whether FILEMETA has TAG."
@@ -136,6 +140,34 @@ from the data file of the file at point."
              (filemeta-has-tags-p (filemeta-for-file file) tags))
            (filemeta-ls-files)))
 
-(defun filemeta-check-db-health () "TODO")
+(defun filemeta-count-files-having-tag (tag)
+  "Count the amount of files under *FILEMETA-ROOT-DIR* that have
+  the tag TAG."
+  (length (filemeta-ls-files-having-tag tag)))
+
+(defun filemeta-health-check-data-file (data-file)
+  "Check if DATA-FILE contains a healthy filemeta."
+  (filemeta-p
+   (filemeta-filemeta-from-data-file data-file)))
+
+(defun filemeta-health-check-file (file)
+  "Check if the data-file of FILE contains a healthy filemeta."
+  (filemeta-health-check-data-file
+   (filemeta-data-for-file file)))
+
+(defun filemeta-ls-unhealthy-data-files ()
+  "Return the list of all unhealthy data files under
+  *FILEMETA-ROOT-DIR*."
+  (loop for data-file in (filemeta-ls-data-files)
+        unless (filemeta-health-check-data-file data-file)
+        collect data-file))
+
+(defun filemeta-health-check-db ()
+  "Return T if all data files under *FILEMETA-ROOT-DIR* are
+  healthy."
+  (if (eq nil (filemeta-ls-unhealthy-data-files))
+      (message "It's healthy.")
+    (message "List of unhealthy data files:\n%s."
+             (filemeta-ls-unhealthy-data-files))))
 
 (provide 'filemeta-tag)
