@@ -15,7 +15,7 @@
 
 (mkdir (setq *filemeta-root-dir* "/tmp/filemeta") t)
 
-(defun ensure-file-exists (file)
+(defun filemeta-ensure-file-exists (file)
   ;; https://stackoverflow.com/questions/16397259/ensure-filepath-exists-for-reading
   (unless (file-exists-p file)
     (make-directory (file-name-directory file) t)
@@ -26,7 +26,7 @@
   (file-truename (filemeta-path filemeta)))
 (defun filemeta-for-file (file)
   (let* ((abs-file (file-truename file))
-         (data-file (ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
+         (data-file (filemeta-ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
          (content (f-read-text data-file 'utf-8))
          (data (ignore-errors (read content))))
     data))
@@ -45,7 +45,7 @@ the input FILE."
   "An utility that deconstructively ensures and gets the path of
 the data file for the input FILE. It creates the data file, if
 not exists yet, under *FILEMETA-ROOT-DIR* recursively."
-  (ensure-file-exists (filemeta-data-for-file file)))
+  (filemeta-ensure-file-exists (filemeta-data-for-file file)))
 
 (defun filemeta-filemeta-from-data-file (data-file)
   "An utility that reads the DATA-FILE and expects the content
