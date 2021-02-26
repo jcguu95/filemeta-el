@@ -1,20 +1,5 @@
 ;;; filemeta-tag.el -mode -*- coding: utf-8; lexical-binding: t; -*-
 
-;;; functional
-
-(defun filemeta-show-tags (filemeta)
-  (filemeta-tags filemeta))
-
-(defun filemeta-file-has-tag-p (file tag)
-  (member tag (filemeta-tags (filemeta-for-file file))))
-
-(defun filemeta-file-has-tag-at-point-p ()
-  (interactive)
-  (let ((tag (intern (ivy-read "Enter tag: " nil))))
-    (if (filemeta-file-has-tag-p (dired-get-filename) tag)
-        (message "true")
-      (message "false"))))
-
 ;;; sort tags
 
 (defun filemeta-sort-tags (filemeta)
