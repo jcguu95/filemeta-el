@@ -19,10 +19,12 @@ copy. FILEMETA untouched."
     (filemeta-write-filemeta-to-data-file
      (filemeta-sort-tags filemeta) data-file)))
 
-(defun filemeta-sort-tags-for-file-at-point ()
-  "Deconstructively sort tags for the file at point."
+(defun filemeta-sort-tags-for-files-at-point ()
+  "Deconstructively sort tags for the marked files, or the file
+at point if no files are marked."
   (interactive)
-  (filemeta-sort-tags-for-file (dired-get-filename)))
+  (loop for file in (dired-get-marked-files) do
+       (filemeta-sort-tags-for-file file)))
 
 ;;; add tags
 
