@@ -65,10 +65,10 @@ of the filemeta of a single file FILE."
 the string to a list of tags. Deconstructively add the tags to
 the data file of the file at point."
   (interactive)
-  (let* ((str (ivy-read "Add tags: " nil)) ;; TODO read candidates from a tag db
-         (tags (filemeta-tokenize str))
-         (file (dired-get-filename))) ;; TODO add to multiple files?
-    (loop for tag in tags do
+  (let* ((file (dired-get-filename))
+         (str (ivy-read "Add tags: " nil)) ;; TODO read candidates from a tag db
+         (tags-to-add (filemeta-tokenize str))) ;; TODO add to multiple files?
+    (loop for tag in tags-to-add do
           (filemeta-add-tag-to-file file tag))))
 
 ;;; remove tags
