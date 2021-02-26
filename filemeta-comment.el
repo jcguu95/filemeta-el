@@ -20,7 +20,7 @@
   "COMMENT is expected to be a string. FILE is expected to be a
 pathname. .. ETC."
   (let* ((abs-file (file-truename file))
-         (data-file (ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
+         (data-file (filemeta-ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
          (content (f-read-text data-file 'utf-8))
          (data (ignore-errors (read content))))
     ;; if data is empty.. create a new filemeta for it
@@ -39,7 +39,7 @@ pathname. .. ETC."
   "COMMENT is expected to be a string. FILE is expected to be a
 pathname. .. ETC."
   (let* ((abs-file (file-truename file))
-         (data-file (ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
+         (data-file (filemeta-ensure-file-exists (concat *filemeta-root-dir* abs-file))) ;; deconstr!
          (content (f-read-text data-file 'utf-8))
          (data (ignore-errors (read content))))
     ;; if data is empty.. create a new filemeta for it
