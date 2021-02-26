@@ -107,9 +107,9 @@ the string to a list of tags. Deconstructively remove the tags
 from the data file of the file at point."
   (interactive)
   (let* ((marked-files (dired-get-marked-files))
-         (tags (flatten-list
-                (loop for file in marked-files collect
-                      (filemeta-tags (filemeta-for-file file)))))
+         (tags (-uniq (flatten-list
+                       (loop for file in marked-files collect
+                             (filemeta-tags (filemeta-for-file file))))))
          (str (ivy-read "Remove tags: " tags)) ;; TODO read candidates from a tag db
          (tags-to-remove (filemeta-tokenize str)))
     (loop for file in marked-files do
