@@ -56,3 +56,8 @@ inside records a filemeta. If there's any error, return NIL."
   "An utility that overwrites the FILEMETA to the DATAFILE."
   (message (format "Updating %s.." data-file))
   (write-region (prin1-to-string filemeta) nil data-file))
+
+(defun filemeta-tokenize (str)
+  "A utility that tokenize the input string STR into a list of
+symbols."
+  (mapcar #'intern (split-string (s-collapse-whitespace str))))
