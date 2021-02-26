@@ -9,6 +9,7 @@
 + [ ] #'filemeta-dired-mark-all-files-with-pred
 
 ** history/destructive/undo
++ [ ] Identify the functions that update the db destructively.
 + [ ] Automatic git the db while a destructive action is made.
 + [ ] filemeta-history: a complete history of what has been done.
   Also, #'filemeta-undo.
