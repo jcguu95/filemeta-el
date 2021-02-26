@@ -20,20 +20,12 @@
 (defun filemeta-sort-tags (filemeta)
   "Functionally sort the tags of FILEMETA and return a fresh
 copy. FILEMETA untouched."
-  (let ((result filemeta))
+  (let ((result (copy-filemeta filemeta)))
+    ;; TODO Can I do it functionally without explicitly copy the
+    ;; whole struct?
     (setf (filemeta-tags result)
           (-sort 'string< (filemeta-tags filemeta)))
-    result)) ;; FIXME it's deconstructive.. but why?
-
-;; testing
-(filemeta-sort-tags filemeta-eg1)
-(setq filemeta-eg1
-      (make-filemeta
-       :path "~/test-image/1.jpg"
-       :comments '("I love this photo.")
-       :tags '(college math career a c b)
-       :hists nil))
-;; testing
+    result))
 
 (defun filemeta-sort-tags-for-file (file)
   (let* ((abs-file (file-truename file))
