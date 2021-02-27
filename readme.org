@@ -5,8 +5,10 @@
 + [X] Add a db health checker.
 
 ** dired
-+ [ ] integrate with dired narrow
++ [ ] integrate with dired narrow: first goal - quickly narrow to
+  those that have tag 'x.
 + [ ] #'filemeta-dired-mark-all-files-with-pred
++ [ ] keybindings?
 
 ** history/destructive/undo
 + [ ] Identify the functions that update the db destructively.
