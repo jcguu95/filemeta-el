@@ -72,18 +72,6 @@ of the filemeta of a single file FILE."
                 collect (let ((filemeta (filemeta-filemeta-from-data-file data-file)))
                           (when filemeta (filemeta-tags filemeta)))))))
 
-(defun filemeta-ls-files ()
-  "Return all files that are associated with some data files
-  under *FILEMETA-ROOT-DIR*."
-  (remove nil
-          (loop for data-file in (directory-files-recursively *filemeta-root-dir* "") ;; TODO use filemeta-ls-data-files
-                collect (let ((filemeta (filemeta-filemeta-from-data-file data-file)))
-                          (when filemeta (filemeta-path filemeta))))))
-
-(defun filemeta-ls-data-files ()
-  "List all data files under *FILEMETA-ROOT-DIR*."
-  (directory-files-recursively *filemeta-root-dir* ""))
-
 (defun filemeta-has-tag-p (filemeta tag)
   "Return whether FILEMETA has TAG."
   (when (member tag (filemeta-tags filemeta)) t))

@@ -63,3 +63,15 @@ inside records a filemeta. If there's any error, return NIL."
   "A utility that tokenize the input string STR into a list of
 symbols."
   (mapcar #'intern (split-string (s-collapse-whitespace str))))
+
+(defun filemeta-ls-files ()
+  "Return all files that are associated with some data files
+  under *FILEMETA-ROOT-DIR*."
+  (remove nil
+          (loop for data-file in (directory-files-recursively *filemeta-root-dir* "") ;; TODO use filemeta-ls-data-files
+                collect (let ((filemeta (filemeta-filemeta-from-data-file data-file)))
+                          (when filemeta (filemeta-path filemeta))))))
+
+(defun filemeta-ls-data-files ()
+  "List all data files under *FILEMETA-ROOT-DIR*."
+  (directory-files-recursively *filemeta-root-dir* ""))
