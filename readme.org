@@ -1,3 +1,67 @@
+* filemeta.el
+
+This program aims to help users add notes to their files.
+
+It mimics the design of =git= in that it creates a sub-directory
+=.filemeta= in the directory that is initiated. =.filemeta= serves as
+the database for this directory. Upon a file is called to be
+annotated, a function will look for where the root of the current
+=filemeta= repo is, by recursively searching upward.
+
+Within a =filemeta= repo, while a file is called to be operated,
+its md5sum would be calculated. Then, its relative path, hash,
+and the current time will be recorded. All annotations are
+assigned to the hashes, but not the paths. That means, if the
+file is moved or renamed, with its content unchanged, this
+program =filemeta= will can still identify and make further
+changes.
+
+This approach has at least two drawbacks. One, directories should
+be handled differently from regular files. Two, if the content is
+changed, something needs to be done to identify the file.
+
+For the second issue, namely while the relative path turns out to
+have different contents from what's recorded in the history,
+=filemeta= will signal a warning, and ask the users what to do
+next. There are a few options.
+
+1. Search recursively in the repo to find the file with the same
+   hash (this could be expensive).
+2. Merge the data for the old hash to this new hash.
+
+Below are some internals.
+
+** database
+
+
+#+begin_src lisp
+;; history
+(:hash hash (:time time :path rel-path) :attachment (x1 x2 x3 ..))
+
+;; attachment
+(:tags (t1 t2 ..) :user-custom-slot-1 (u1 u2 ..))
+#+end_src
+
+** health check
+
+make sure there's no other =.filemeta= in a filemeta-repo.
+
+** functions
+
++ repo-root<-path
++ relative-path<-path
++ hash<-path
++ attachment<-hash
++ size<-path (huge file alert)
+
++ tag-path
++ update-hash-history (keep the latest time checked and the
+  latest time changed recursively)
++ update-history (do it anytime a hash is computed)
++ cp-attachment-to-hash
++ rm-attachment
+
++ all-tags-in-repo
 * todo-list
 
 + [X] More doc strings! More message output!
