@@ -1,0 +1,4 @@
+In order to quickly narrow down to files having specific tags,
+it'd be a good idea to make use of =dired-narrow=. I have to deal
+with its internal function.. and have to understand how it works
+before writing my own filtering function that works with it.
