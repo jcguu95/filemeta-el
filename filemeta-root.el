@@ -1,14 +1,20 @@
 ;; TODO under construction
 
+(require 'f)
+
+(defvar filemeta-root-name ".filemeta")
+
 (defun filemeta-wheres-root (path)
-  "Return the filemeta-root for PATH."
-
-  ;; Search for directory ".filemeta" in the directory of PATH.
-  ;; Return the path of ".filemeta" if any. Otherwise, go to the
-  ;; mother directory and do it again, and again and again until
-  ;; it hits "/". In this case, return nil.
-
-  )
+  "It recursively searches upward for, and returns if any, the
+  closest directory that contains \"filemeta\"."
+  (labels ((parents (path)
+                    "Return the list of parents for PATH recursively"
+                    (unless (equal path "/")
+                      (let ((parent (f-parent path)))
+                        (cons parent (parents parent))))))
+    (loop for d in (parents path)
+          when (f-directory-p (concat d "/" filemeta-root-name))
+          return d)))
 
 (defun filemeta-path-hash (path)
   "If PATH is a regular file, return the md5sum for its content.
