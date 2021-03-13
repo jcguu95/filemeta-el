@@ -48,28 +48,39 @@
   "Return the path to the filemeta for the hash of FILE."
   (let ((hash (filemeta-path-hash file))
         (root (filemeta-wheres-root file)))
-    (concat root hash)))
+    (f-join root filemeta-root-name hash)))
 
 (defun filemeta-hash-file (file)
   "Return the path to the filemeta database for the hash of
 FILE."
-  (concat (filemeta-hash-dir file) ".db.el"))
+  (f-join (filemeta-hash-dir file) ".db.el"))
 
 (defun filemeta-read-filemeta (file)
-  ;; FIXME conflicts with the old one?
-  ;; expect a FILEMETA to be read.
-  ""
-  (read (filemeta-hash-file file)))
+  "Expect a plist in the hash-file for the hash of FILE."
+  (let ((hash-file (filemeta-hash-file file)))
+    (ignore-errors                       ;; TODO fix this bad practice
+        (with-temp-buffer
+          (insert-file-contents hash-file)
+          (read (buffer-string))))))
 
-(defun filemeta-write-filemeta (filemeta file)
-  ;; FIXME conflicts with the old one?
-  ""
-  (if (filemeta-p filemeta)
-      ;; (WRITE filemeta TO (filemeta-hash-file file))
-      (error "Type error.")))
+(defun filemeta-write-filemeta (x file)
+  "Write X to the hash-file of FILE."
+  (let ((hash-dir (filemeta-hash-dir file))
+        (hash-file (filemeta-hash-file file)))
+    (files--ensure-directory hash-dir)
+    (f-write-text (prin1-to-string x)
+                  'utf-8 hash-file)))
 
-(defun filemeta-tag-file (tag file)
+(defun filemeta-add-tag-to-file (tag file)
   "Expect TAG to be a symbol. Add tag to the filemeta of FILE,
 and write the updated filemeta to the hash-file for FILE."
-  ;; TODO ..
-  )
+  (unless (symbolp tag)
+    (error "TAG must be a symbol."))
+  (let* ((plist (filemeta-read-filemeta file)))
+    (filemeta-write-filemeta
+     (plist-put plist
+                :tag (sort (-uniq (cons tag
+                                        (plist-get plist :tag)))
+                           #'string<))
+     file)
+    ))
