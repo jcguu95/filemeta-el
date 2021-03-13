@@ -1,6 +1,9 @@
 ;;; filemeta.el -mode -*- coding: utf-8; lexical-binding: t; -*-
 
 (require 'f)
+(require 'filemeta-dired)
+(require 'filemeta-stats)
+;; (require 'filemeta-test)
 
 (defvar filemeta:root-name ".filemeta")
 (defvar filemeta:hashfile-name ".db.el")
@@ -76,7 +79,8 @@ FILE."
           (read (buffer-string))))))
 
 (defun filemeta:write-attachment! (x file)
-  "Write X to the hash-file of FILE."
+  "Write X to the hash-file of FILE. Expect X to be READably
+printed."
   ;; TODO Reformat the plist to be written by a variant of
   ;; #'lispy-multiline before writing.
   (let ((hash-dir (filemeta:hashdir<-file file))
@@ -114,8 +118,6 @@ FILE."
                                              (plist-get plist :tag))))))
       (filemeta:write-attachment! plist_ file))))
 
-;;; hash history, relative path.. etc
-
 (defun filemeta:update-file-history! (file)
   "Check and update the history of the hash of the FILE. Expect
 FILE to be a regular file."
@@ -134,93 +136,3 @@ FILE to be a regular file."
     ;; Update plist and write to database.
     (plist-put! plist :history hist)
     (filemeta:write-attachment! plist file)))
-
-;;; statistics
-
-(defun filemeta:db-dump (dir)
-  "Expect DIR to be a filemeta-repo. Dump the db into an elisp
-  list."
-  (if (not (filemeta:is-repo-p dir))
-      (error (format "(DIR=%s) must be a filemeta-repo." dir))
-    (let* ((db (f-join dir filemeta:root-name))
-           (hashdirs (f-directories db)))
-      (loop for hashdir in hashdirs
-            collect (list :hash (f-base hashdir)
-                          :hashdir hashdir
-                          :attachment
-                          (let ((hash-file (concat hashdir "/"
-                                                   filemeta:hashfile-name)))
-                            (ignore-errors ;; TODO fihashdir this bad practice
-                              (with-temp-buffer
-                                (insert-file-contents hash-file)
-                                (read (buffer-string))))))))))
-
-(defun filemeta:hashes-in-repo (dir)
-  "Expect DIR to be a filemeta-repo. Return all hashes in the
-database."
-  (mapcar (lambda (x) (plist-get x :hash))
-          (filemeta:db-dump dir)))
-
-(defun filemeta:tags-in-repo (dir)
-  "Expect DIR to be a filemeta-repo. Return all tags in the
-database."
-  (sort (-uniq
-         (-flatten
-          (mapcar (lambda (x)
-                    (plist-get (plist-get x :attachment) :tag))
-                  (filemeta:db-dump dir))))
-        #'string<))
-
-;;; dired
-
-(defun filemeta:dired-marked-files-attachments ()
-  "Return the attachments of all marked files."
-  (interactive)
-  (let ((files (dired-get-marked-files)))
-    (loop for file in files
-          collect (filemeta:attachment<-file file))))
-
-(defun filemeta:dired-marked-files-tags ()
-  "Return all tags that appear in some marked files."
-  (interactive)
-  (-uniq (-flatten
-    (mapcar (lambda (x) (plist-get x :tag))
-            (filemeta:dired-marked-files-attachments)))))
-
-(defun filemeta:dired-marked-files-+tag ()
-  "Let user add tag(s) to marked files in dired."
-  (interactive)
-  (let* ((files (dired-get-marked-files))
-         (raw-tags (ivy-read "+tags: " (filemeta:tags-in-repo ".")))
-         (tags (mapcar #'intern (split-string raw-tags))))
-    (loop for file in files
-          do (loop for tag in tags
-                   do (filemeta:+tag! tag file)))))
-
-(defun filemeta:dired-marked-files--tag ()
-  "Let user remove tag(s) from marked files in dired."
-  (interactive)
-  (let* ((files (dired-get-marked-files))
-         ;; FIXME only have to show tags for the marked files
-         (raw-tags (ivy-read "+tags: " (filemeta:dired-marked-files-tags)))
-         (tags (mapcar #'intern (split-string raw-tags))))
-    (loop for file in files
-          do (loop for tag in tags
-                   do (filemeta:-tag! tag file)))))
-
-;;; testing
-
-(defvar filemeta:testdir "/tmp/filemeta/testing/")
-(defvar filemeta:testfile (f-join filemeta:testdir "hello.txt"))
-(mkdir filemeta:testdir t)
-(filemeta:init filemeta:testdir)
-(f-write-text "" 'utf-8 filemeta:testfile)
-(loop for tag in '(math physics cs nerdy techie)
-      do (filemeta:+tag! tag filemeta:testfile))
-(loop for tag in '(nerdy techie)
-      do (filemeta:-tag! tag filemeta:testfile))
-
-(filemeta:db-dump filemeta:testdir)
-(filemeta:hashes-in-repo filemeta:testdir)
-(filemeta:tags-in-repo filemeta:testdir)
-(filemeta:update-file-history! filemeta:testfile)
