@@ -1,13 +1,14 @@
-;; TODO under construction
-;;
-;; TODO basic ingredients are made.. now try to merge the old
-;; functions here.
+;; TODO This file is under construction.
 ;;
 ;; FIXME the filename "filemeta-root" is a misnomer.. fix it.
 
 (require 'f)
 
 (defvar filemeta-root-name ".filemeta")
+
+(defun filemeta-relative-path (path)
+  (let ((root (filemeta-wheres-root path)))
+    (concat "./" (f-relative path root))))
 
 (defun filemeta-init (path)
   "Make the filemeta database for the current directory PATH."
@@ -16,8 +17,10 @@
         (if (f-exists-p db)
             (error "Init process fails because DB exists.")
           (progn (mkdir db)
-                 (f-write-text (prin1-to-string (cons (ts-format) "Db init."))
-                               'utf-8 (f-join db "history"))))
+                 (f-write-text (prin1-to-string
+                                (list (ts-format) "Db init."))
+                               'utf-8
+                               (f-join db "history"))))
       (error "PATH must be a directory."))))
 
 (defun filemeta-wheres-root (path)
@@ -65,6 +68,8 @@ FILE."
 
 (defun filemeta-write-filemeta (x file)
   "Write X to the hash-file of FILE."
+  ;; TODO Reformat the plist to be written by a variant of
+  ;; #'lispy-multiline before writing.
   (let ((hash-dir (filemeta-hash-dir file))
         (hash-file (filemeta-hash-file file)))
     (files--ensure-directory hash-dir)
@@ -102,19 +107,13 @@ FILE."
 
 ;;; hash history, relative path.. etc
 
-(defun filemeta-relative-path (path)
-  (let ((root (filemeta-wheres-root path)))
-    (concat "./" (f-relative path root))))
-
 (defun filemeta-update-path-history (path)
   "Check and update the history of the hash of the PATH. Expect
 PATH to be a regular file."
-  (let* ((hash (filemeta-path-hash path)) ; TODO remove if not used?
-         (plist (filemeta-read-filemeta path))
+  (let* ((plist (filemeta-read-filemeta path))
          (hist (plist-get plist :history))
          (rel-path (filemeta-relative-path path))
          (last-rel-path (-last-item (-last-item hist))))
-
     ;; Update history slot accordingly.
     (if (equal rel-path last-rel-path)
         ;; Then only need to update time.
@@ -141,5 +140,3 @@ PATH to be a regular file."
       do (filemeta-remove-tag-from-file tag filemeta-testfile))
 
 (filemeta-update-path-history filemeta-testfile)
-
-;; TODO need to record the history of hash-path & each destructive action
