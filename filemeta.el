@@ -1,6 +1,4 @@
 ;; TODO This file is under construction.
-;;
-;; FIXME the filename "filemeta-root" is a misnomer.. fix it.
 
 (require 'f)
 
