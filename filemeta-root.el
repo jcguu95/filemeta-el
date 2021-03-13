@@ -5,6 +5,7 @@
 (require 'f)
 
 (defvar filemeta:root-name ".filemeta")
+(defvar filemeta:hashfile-name ".db.el")
 
 (defun filemeta:rel-path<-file (reg-file)
   (let ((root (filemeta:root<-file reg-file)))
@@ -18,7 +19,7 @@
             (error "Init process fails because DB exists.")
           (progn (mkdir db)
                  (f-write-text (prin1-to-string
-                                (list (ts-format) "Db init."))
+                                (list (ts-format) "DB init."))
                                'utf-8
                                (f-join db "history"))))
       (error "DIR must be a directory."))))
@@ -56,7 +57,7 @@
 (defun filemeta:hashfile<-file (file)
   "Return the path to the filemeta database for the hash of
 FILE."
-  (f-join (filemeta:hashdir<-file file) ".db.el"))
+  (f-join (filemeta:hashdir<-file file) filemeta:hashfile-name))
 
 (defun filemeta:filemeta<-file (file)
   "Expect a plist in the hash-file for the hash of FILE."
