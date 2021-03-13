@@ -22,10 +22,10 @@
                  ;;               'utf-8
                  ;;               (f-join db "history"))
                  ))
-      (error "DIR must be a directory."))))
+      (error (format "(DIR=%s) must be a directory." dir)))))
 
 (defun filemeta:is-repo-p (dir)
-  (f-directory-p (concat dir filemeta:root-name)))
+  (f-directory-p (f-join dir filemeta:root-name)))
 
 (defun filemeta:root<-file (file)
   "It recursively searches upward for, and returns if any, the
@@ -36,7 +36,7 @@
                       (let ((parent (f-parent file)))
                         (cons parent (parents parent))))))
     (loop for dir in (parents file)
-          when (filemeta:is-repo-p (concat dir "/"))
+          when (filemeta:is-repo-p dir)
           return dir)))
 
 (defun filemeta:hash<-file (file)
@@ -141,8 +141,8 @@ FILE to be a regular file."
   "Expect DIR to be a filemeta-repo. Dump the db into an elisp
   list."
   (if (not (filemeta:is-repo-p dir))
-      (error "DIR must be a filemeta-repo.")
-    (let* ((db (concat dir filemeta:root-name))
+      (error (format "(DIR=%s) must be a filemeta-repo." dir))
+    (let* ((db (f-join dir filemeta:root-name))
            (hashdirs (f-directories db)))
       (loop for hashdir in hashdirs
             collect (list :hash (f-base hashdir)
@@ -170,6 +170,18 @@ database."
                     (plist-get (plist-get x :attachment) :tag))
                   (filemeta:db-dump dir))))
         #'string<))
+
+;;; dired
+
+(defun filemeta:dired-marked-files+tag ()
+  "Let user add tags to marked files in dired."
+  (interactive)
+  (let* ((files (dired-get-marked-files))
+         (raw-tags (ivy-read "+tags: " (filemeta:tags-in-repo ".")))
+         (tags (mapcar #'intern (split-string raw-tags))))
+    (loop for file in files
+          do (loop for tag in tags
+                   do (filemeta:+tag! tag file)))))
 
 ;;; testing
 
