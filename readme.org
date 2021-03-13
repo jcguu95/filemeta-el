@@ -63,3 +63,4 @@ Below are some internals.
 + [ ] Attachment editor: use lens/comonads, #'rm-attachment,
   #'cp-attachment.
 + [ ] Add a license.. which one?
++ [ ] Think of a better way to =update-file-history!=.
