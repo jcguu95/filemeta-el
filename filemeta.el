@@ -4,6 +4,7 @@
 
 (defvar filemeta:root-name ".filemeta")
 (defvar filemeta:hashfile-name ".db.el")
+(defvar filemeta:large-file-threshold 500000000) ;; ~500mb?
 
 (defun filemeta:rel-path<-file (reg-file)
   (let ((root (filemeta:root<-file reg-file)))
@@ -62,7 +63,7 @@
 FILE."
   (f-join (filemeta:hashdir<-file file) filemeta:hashfile-name))
 
-(defun filemeta:filemeta<-file (file)
+(defun filemeta:attachment<-file (file)
   "Expect a plist in the hash-file for the hash of FILE."
   (let ((hash-file (filemeta:hashfile<-file file)))
     (ignore-errors                       ;; TODO fix this bad practice
@@ -70,7 +71,7 @@ FILE."
           (insert-file-contents hash-file)
           (read (buffer-string))))))
 
-(defun filemeta:write-filemeta! (x file)
+(defun filemeta:write-attachment! (x file)
   "Write X to the hash-file of FILE."
   ;; TODO Reformat the plist to be written by a variant of
   ;; #'lispy-multiline before writing.
@@ -88,11 +89,11 @@ FILE."
     (error "TAG must be a symbol."))
   (flet ((sort+uniq (symbols)
                     (sort (-uniq symbols) #'string<)))
-    (let* ((plist (filemeta:filemeta<-file file))
+    (let* ((plist (filemeta:attachment<-file file))
            (plist_ (plist-put plist     ;; TODO fix bad updating method..
                               :tag (sort+uniq
                                     (cons tag (plist-get plist :tag))))))
-      (filemeta:write-filemeta! plist_ file))))
+      (filemeta:write-attachment! plist_ file))))
 
 (defun filemeta:-tag! (tag file)
   "Expect TAG to be a symbol. Remove all tags that equal to TAG
@@ -102,19 +103,19 @@ FILE."
     (error "TAG must be a symbol."))
   (flet ((sort+uniq (symbols)
                     (sort (-uniq symbols) #'string<)))
-    (let* ((plist (filemeta:filemeta<-file file))
+    (let* ((plist (filemeta:attachment<-file file))
            (plist_ (plist-put plist ;; TODO fix bad updating method..
                               :tag (sort+uniq
                                     (-remove (lambda (x) (equal x tag))
                                              (plist-get plist :tag))))))
-      (filemeta:write-filemeta! plist_ file))))
+      (filemeta:write-attachment! plist_ file))))
 
 ;;; hash history, relative path.. etc
 
 (defun filemeta:update-file-history! (file)
   "Check and update the history of the hash of the FILE. Expect
 FILE to be a regular file."
-  (let* ((plist (filemeta:filemeta<-file file))
+  (let* ((plist (filemeta:attachment<-file file))
          (hist (plist-get plist :history))
          (rel-path (filemeta:rel-path<-file file))
          (last-rel-path (-last-item (-last-item hist))))
@@ -128,7 +129,7 @@ FILE to be a regular file."
                          `(,(list (ts-format) rel-path)))))
     ;; Update plist and write to database.
     (plist-put! plist :history hist)
-    (filemeta:write-filemeta! plist file)))
+    (filemeta:write-attachment! plist file)))
 
 ;;; testing
 
