@@ -94,9 +94,10 @@ FILE."
   (flet ((sort+uniq (symbols)
                     (sort (-uniq symbols) #'string<)))
     (let* ((plist (filemeta:attachment<-file file))
-           (plist_ (plist-put plist     ;; TODO fix bad updating method..
+           (plist_ (plist-put plist ;; TODO fix bad updating method..
                               :tag (sort+uniq
                                     (cons tag (plist-get plist :tag))))))
+      (filemeta:update-file-history! file)
       (filemeta:write-attachment! plist_ file))))
 
 (defun filemeta:-tag! (tag file)
@@ -112,6 +113,7 @@ FILE."
                               :tag (sort+uniq
                                     (-remove (lambda (x) (equal x tag))
                                              (plist-get plist :tag))))))
+      (filemeta:update-file-history! file)
       (filemeta:write-attachment! plist_ file))))
 
 ;;; hash history, relative path.. etc
