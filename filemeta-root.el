@@ -2,6 +2,8 @@
 ;;
 ;; TODO basic ingredients are made.. now try to merge the old
 ;; functions here.
+;;
+;; FIXME the filename "filemeta-root" is a misnomer.. fix it.
 
 (require 'f)
 
