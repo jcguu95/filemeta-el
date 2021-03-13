@@ -1,6 +1,6 @@
-* filemeta.el
+* filemeta-el
 
-This program aims to help users add notes to their files.
+This elisp program aims to help users add notes to their files.
 
 Each regular file has a =md5= hash. This program helps attach lisp
 objects to that hash. When the regular file moves without
@@ -20,6 +20,9 @@ $ cat ./.filemeta/d41d8cd98f00b204e9800998ecf8427e/.db.el
  :custom-2 (u21 u22 ..)
  :.. ..)
 #+end_src
+
+Check out =#'filemeta:dired-marked-files-+tag= as an example to see
+how to quickly tag files.
 
 * todo lists
 
