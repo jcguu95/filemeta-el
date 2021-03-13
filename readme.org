@@ -33,14 +33,13 @@ Below are some internals.
 
 ** database
 
-TODO - fix this part
-
-#+begin_src lisp
-;; history
-(:hash hash (:time time :path rel-path) :attachment (x1 x2 x3 ..))
-
+#+begin_src elisp
 ;; attachment
-(:tags (t1 t2 ..) :user-custom-slot-1 (u1 u2 ..))
+(:tag (t1 t2 ..)
+ :history (h1 h2 ..)
+ :custom-1 (u11 u12 ..)
+ :custom-2 (u21 u22 ..)
+ :.. ..)
 #+end_src
 
 ** functions
@@ -50,8 +49,13 @@ TODO - fix this part
 + [X] hash<-file
 + [X] +tag!, -tag!
 + [X] update-file-history!
-+ [ ] attachment<-file
-+ [ ] cp-attachment-to-hash
-+ [ ] rm-attachment
++ [X] attachment<-file
 + [ ] all-tags-in-repo
+
+* todo lists
+
 + [ ] version control every thing
++ [ ] syntactically abstract +tag/-tag by macros, for the users
+  to write functions for their own slots easily.
++ [ ] Attachment editor: use lens/comonads, #'rm-attachment,
+  #'cp-attachment.
