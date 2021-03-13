@@ -84,3 +84,21 @@ and write the updated filemeta to the hash-file for FILE."
                            #'string<))
      file)
     ))
+
+(defun filemeta-remove-tag-from-file (tag file)
+  "Expect TAG to be a symbol. Remove all tags that equal to TAG
+  in the filemeta of FILE,and write the updated filemeta to the
+  hash-file for FILE."
+  (unless (symbolp tag)
+    (error "TAG must be a symbol."))
+  (flet ((sort+uniq (symbols)
+                    (sort (-uniq symbols) #'string<)))
+    (let* ((plist (filemeta-read-filemeta file))
+           (plist_ (plist-put plist     ;; TODO fix bad updating method..
+                              :tag (sort+uniq (-remove (lambda (x) (equal x tag))
+                                                       (plist-get plist :tag))))))
+      (filemeta-write-filemeta plist_ file))))
+
+;;; testing
+(filemeta-add-tag-to-file 'bch "~/testing/hi.txt")
+(filemeta-remove-tag-from-file 'bch "~/testing/hi.txt")
