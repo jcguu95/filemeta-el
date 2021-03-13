@@ -51,10 +51,12 @@ Below are some internals.
 + [X] update-file-history!
 + [X] attachment<-file
 + [X] tags-in-repo
++ [X] dired-marked-files-+tag, dired-marked-files--tag
 
 * todo lists
 
 + [ ] Version control everything in the database.
++ [ ] Multi-select with =ivy=, possible?
 + [ ] Syntactically abstract with macros +tag/-tag/fetch-tag..
   etc, for the users to write functions for their own slots
   easily.
