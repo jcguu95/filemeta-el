@@ -109,3 +109,5 @@ FILE."
       do (filemeta-add-tag-to-file tag filemeta-testfile))
 (loop for tag in '(nerdy techie)
       do (filemeta-remove-tag-from-file tag filemeta-testfile))
+
+;; TODO need to record the history of hash-path & each destructive action
