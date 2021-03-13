@@ -2,56 +2,24 @@
 
 This program aims to help users add notes to their files.
 
-It mimics the design of =git= in that it creates a sub-directory
-=.filemeta= in the directory that is initiated. =.filemeta= serves as
-the database for this directory. Upon a file is called to be
-annotated, a function will look for where the root of the current
-=filemeta= repo is, by recursively searching upward.
+Each regular file has a =md5= hash. This program helps attach lisp
+objects to that hash. When the regular file moves without
+changing its content, the attachment stays.
 
-Within a =filemeta= repo, while a file is called to be operated,
-its md5sum would be calculated. Then, its relative path, hash,
-and the current time will be recorded. All annotations are
-assigned to the hashes, but not the paths. That means, if the
-file is moved or renamed, with its content unchanged, this
-program =filemeta= will can still identify and make further
-changes.
+To get started, initiate =filemeta= in your favorite directory. It
+creates =.filemeta= as =git= creates =.git=. All data go under
+=.filemeta=. As shown below, each hash has a file that stores a
+lisp list.
 
-This approach has at least two drawbacks. One, directories should
-be handled differently from regular files. Two, if the content is
-changed, something needs to be done to identify the file.
+#+begin_src
+$ cat ./.filemeta/d41d8cd98f00b204e9800998ecf8427e/.db.el
 
-For the second issue, namely while the relative path turns out to
-have different contents from what's recorded in the history,
-=filemeta= will signal a warning, and ask the users what to do
-next. There are a few options.
-
-1. Search recursively in the repo to find the file with the same
-   hash (this could be expensive).
-2. Merge the data for the old hash to this new hash.
-
-Below are some internals.
-
-** database (attachment)
-
-#+begin_src elisp
-;; attachment
 (:tag (t1 t2 ..)
  :history (h1 h2 ..)
  :custom-1 (u11 u12 ..)
  :custom-2 (u21 u22 ..)
  :.. ..)
 #+end_src
-
-** functions
-
-+ [X] root<-file
-+ [X] rel-path<-file
-+ [X] hash<-file
-+ [X] +tag!, -tag!
-+ [X] update-file-history!
-+ [X] attachment<-file
-+ [X] tags-in-repo
-+ [X] dired-marked-files-+tag, dired-marked-files--tag
 
 * todo lists
 
@@ -64,3 +32,15 @@ Below are some internals.
   #'cp-attachment.
 + [ ] Add a license.. which one?
 + [ ] Think of a better way to =update-file-history!=.
+
+* functions
+
++ [X] root<-file
++ [X] rel-path<-file
++ [X] hash<-file
++ [X] +tag!, -tag!
++ [X] update-file-history!
++ [X] attachment<-file
++ [X] tags-in-repo
++ [X] dired-marked-files-+tag, dired-marked-files--tag
++ [ ] search-relative-path
