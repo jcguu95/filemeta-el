@@ -173,8 +173,8 @@ database."
 
 ;;; dired
 
-(defun filemeta:dired-marked-files+tag ()
-  "Let user add tags to marked files in dired."
+(defun filemeta:dired-marked-files-+tag ()
+  "Let user add tag(s) to marked files in dired."
   (interactive)
   (let* ((files (dired-get-marked-files))
          (raw-tags (ivy-read "+tags: " (filemeta:tags-in-repo ".")))
@@ -182,6 +182,18 @@ database."
     (loop for file in files
           do (loop for tag in tags
                    do (filemeta:+tag! tag file)))))
+
+
+(defun filemeta:dired-marked-files--tag ()
+  "Let user remove tag(s) from marked files in dired."
+  (interactive)
+  (let* ((files (dired-get-marked-files))
+         ;; FIXME only have to show tags for the marked files
+         (raw-tags (ivy-read "+tags: " (filemeta:tags-in-repo ".")))
+         (tags (mapcar #'intern (split-string raw-tags))))
+    (loop for file in files
+          do (loop for tag in tags
+                   do (filemeta:-tag! tag file)))))
 
 ;;; testing
 
