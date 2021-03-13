@@ -75,7 +75,7 @@ FILE."
     (f-write-text (prin1-to-string x)
                   'utf-8 hash-file)))
 
-(defun filemeta:add-tag-to-file! (tag file)
+(defun filemeta:+tag! (tag file)
   "Expect TAG to be a symbol. Remove all tags that equal to TAG
   in the filemeta of FILE,and write the updated filemeta to the
   hash-file for FILE."
@@ -89,7 +89,7 @@ FILE."
                                     (cons tag (plist-get plist :tag))))))
       (filemeta:write-filemeta! plist_ file))))
 
-(defun filemeta:remove-tag-from-file! (tag file)
+(defun filemeta:-tag! (tag file)
   "Expect TAG to be a symbol. Remove all tags that equal to TAG
   in the filemeta of FILE,and write the updated filemeta to the
   hash-file for FILE."
@@ -133,8 +133,8 @@ FILE to be a regular file."
 (filemeta:init filemeta:testdir)
 (f-write-text "" 'utf-8 filemeta:testfile)
 (loop for tag in '(math physics cs nerdy techie)
-      do (filemeta:add-tag-to-file! tag filemeta:testfile))
+      do (filemeta:+tag! tag filemeta:testfile))
 (loop for tag in '(nerdy techie)
-      do (filemeta:remove-tag-from-file! tag filemeta:testfile))
+      do (filemeta:-tag! tag filemeta:testfile))
 
 (filemeta:update-file-history! filemeta:testfile)
