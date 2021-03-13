@@ -173,6 +173,20 @@ database."
 
 ;;; dired
 
+(defun filemeta:dired-marked-files-attachments ()
+  "Return the attachments of all marked files."
+  (interactive)
+  (let ((files (dired-get-marked-files)))
+    (loop for file in files
+          collect (filemeta:attachment<-file file))))
+
+(defun filemeta:dired-marked-files-tags ()
+  "Return all tags that appear in some marked files."
+  (interactive)
+  (-uniq (-flatten
+    (mapcar (lambda (x) (plist-get x :tag))
+            (filemeta:dired-marked-files-attachments)))))
+
 (defun filemeta:dired-marked-files-+tag ()
   "Let user add tag(s) to marked files in dired."
   (interactive)
@@ -182,7 +196,6 @@ database."
     (loop for file in files
           do (loop for tag in tags
                    do (filemeta:+tag! tag file)))))
-
 
 (defun filemeta:dired-marked-files--tag ()
   "Let user remove tag(s) from marked files in dired."
