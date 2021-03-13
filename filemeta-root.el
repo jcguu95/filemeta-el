@@ -81,7 +81,8 @@ FILE."
                     (sort (-uniq symbols) #'string<)))
     (let* ((plist (filemeta-read-filemeta file))
            (plist_ (plist-put plist     ;; TODO fix bad updating method..
-                              :tag (sort+uniq (cons tag (plist-get plist :tag))))))
+                              :tag (sort+uniq
+                                    (cons tag (plist-get plist :tag))))))
       (filemeta-write-filemeta plist_ file))))
 
 (defun filemeta-remove-tag-from-file (tag file)
@@ -94,9 +95,38 @@ FILE."
                     (sort (-uniq symbols) #'string<)))
     (let* ((plist (filemeta-read-filemeta file))
            (plist_ (plist-put plist ;; TODO fix bad updating method..
-                              :tag (sort+uniq (-remove (lambda (x) (equal x tag))
-                                                       (plist-get plist :tag))))))
+                              :tag (sort+uniq
+                                    (-remove (lambda (x) (equal x tag))
+                                             (plist-get plist :tag))))))
       (filemeta-write-filemeta plist_ file))))
+
+;;; hash history, relative path.. etc
+
+(defun filemeta-relative-path (path)
+  (let ((root (filemeta-wheres-root path)))
+    (concat "./" (f-relative path root))))
+
+(defun filemeta-update-path-history (path)
+  "Check and update the history of the hash of the PATH. Expect
+PATH to be a regular file."
+  (let* ((hash (filemeta-path-hash path)) ; TODO remove if not used?
+         (plist (filemeta-read-filemeta path))
+         (hist (plist-get plist :history))
+         (rel-path (filemeta-relative-path path))
+         (last-rel-path (-last-item (-last-item hist))))
+
+    ;; Update history slot accordingly.
+    (if (equal rel-path last-rel-path)
+        ;; Then only need to update time.
+        (setf hist (append (-drop-last 1 hist)
+                           `(,(list (ts-format) rel-path))))
+      ;; Otherwise, add a new entry to history.
+      (setf hist (append hist
+                         `(,(list (ts-format) rel-path)))))
+
+    ;; Update plist and write to database.
+    (plist-put! plist :history hist)
+    (filemeta-write-filemeta plist path)))
 
 ;;; testing
 
@@ -109,5 +139,7 @@ FILE."
       do (filemeta-add-tag-to-file tag filemeta-testfile))
 (loop for tag in '(nerdy techie)
       do (filemeta-remove-tag-from-file tag filemeta-testfile))
+
+(filemeta-update-path-history filemeta-testfile)
 
 ;; TODO need to record the history of hash-path & each destructive action
