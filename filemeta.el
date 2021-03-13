@@ -43,8 +43,13 @@
                         (with-temp-buffer
                           (insert-file-contents file)
                           (md5 (buffer-string)))))))
+    (let ((size (f-size file))
+          (thres filemeta:large-file-threshold))
+      (when (> size thres)
+        (message "Warning! \"%s\" is a large file (%s > %s)." file size thres)))
     (when (file-regular-p file)
       (md5sum file))))
+
 
 (defun filemeta:hashdir<-file (file)
   "Return the path to the filemeta for the hash of FILE."

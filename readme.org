@@ -48,7 +48,6 @@ TODO - fix this part
 + [X] root<-file
 + [X] rel-path<-file
 + [X] hash<-file
-+ [ ] size<-file (and huge file alert)
 + [X] +tag!, -tag!
 + [X] update-file-history!
 + [ ] attachment<-file
