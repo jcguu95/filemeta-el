@@ -114,8 +114,6 @@ FILE."
                                              (plist-get plist :tag))))))
       (filemeta:write-attachment! plist_ file))))
 
-
-
 ;;; hash history, relative path.. etc
 
 (defun filemeta:update-file-history! (file)
@@ -137,18 +135,45 @@ FILE to be a regular file."
     (plist-put! plist :history hist)
     (filemeta:write-attachment! plist file)))
 
-(defun filemeta:hashes-in-repo (dir)
-  "Expect DIR to be a filemeta-repo. Return all hashes in the
-database."
+;;; statistics
+
+(defun filemeta:db-dump (dir)
+  "Expect DIR to be a filemeta-repo. Dump the db into an elisp
+  list."
   (if (not (filemeta:is-repo-p dir))
       (error "DIR must be a filemeta-repo.")
     (let* ((db (concat dir filemeta:root-name))
            (hashdirs (f-directories db)))
-      (mapcar #'f-base hashdirs))))
+      (loop for hashdir in hashdirs
+            collect (list :hash (f-base hashdir)
+                          :hashdir hashdir
+                          :attachment
+                          (let ((hash-file (concat hashdir "/"
+                                                   filemeta:hashfile-name)))
+                            (ignore-errors ;; TODO fihashdir this bad practice
+                              (with-temp-buffer
+                                (insert-file-contents hash-file)
+                                (read (buffer-string))))))))))
+
+(defun filemeta:hashes-in-repo (dir)
+  "Expect DIR to be a filemeta-repo. Return all hashes in the
+database."
+  (mapcar (lambda (x) (plist-get x :hash))
+          (filemeta:db-dump dir)))
+
+(defun filemeta:tags-in-repo (dir)
+  "Expect DIR to be a filemeta-repo. Return all tags in the
+database."
+  (sort (-uniq
+         (-flatten
+          (mapcar (lambda (x)
+                    (plist-get (plist-get x :attachment) :tag))
+                  (filemeta:db-dump dir))))
+        #'string<))
 
 ;;; testing
 
-(defvar filemeta:testdir "/tmp/filemeta/testing")
+(defvar filemeta:testdir "/tmp/filemeta/testing/")
 (defvar filemeta:testfile (f-join filemeta:testdir "hello.txt"))
 (mkdir filemeta:testdir t)
 (filemeta:init filemeta:testdir)
