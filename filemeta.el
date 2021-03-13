@@ -17,10 +17,11 @@
         (if (f-exists-p db)
             (error "Init process fails because DB exists.")
           (progn (mkdir db)
-                 (f-write-text (prin1-to-string
-                                (list (ts-format) "DB init."))
-                               'utf-8
-                               (f-join db "history"))))
+                 ;; (f-write-text (prin1-to-string
+                 ;;                (list (ts-format) "DB init."))
+                 ;;               'utf-8
+                 ;;               (f-join db "history"))
+                 ))
       (error "DIR must be a directory."))))
 
 (defun filemeta:is-repo-p (dir)
@@ -113,6 +114,8 @@ FILE."
                                              (plist-get plist :tag))))))
       (filemeta:write-attachment! plist_ file))))
 
+
+
 ;;; hash history, relative path.. etc
 
 (defun filemeta:update-file-history! (file)
@@ -134,9 +137,14 @@ FILE to be a regular file."
     (plist-put! plist :history hist)
     (filemeta:write-attachment! plist file)))
 
-(defun filemeta:tags-in-repo (repo)
-  "TODO"
-  )
+(defun filemeta:hashes-in-repo (dir)
+  "Expect DIR to be a filemeta-repo. Return all hashes in the
+database."
+  (if (not (filemeta:is-repo-p dir))
+      (error "DIR must be a filemeta-repo.")
+    (let* ((db (concat dir filemeta:root-name))
+           (hashdirs (f-directories db)))
+      (mapcar #'f-base hashdirs))))
 
 ;;; testing
 
