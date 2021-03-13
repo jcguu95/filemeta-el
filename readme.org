@@ -50,7 +50,7 @@ Below are some internals.
 + [X] +tag!, -tag!
 + [X] update-file-history!
 + [X] attachment<-file
-+ [ ] all-tags-in-repo
++ [X] tags-in-repo
 
 * todo lists
 
