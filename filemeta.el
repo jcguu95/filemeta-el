@@ -23,6 +23,9 @@
                                (f-join db "history"))))
       (error "DIR must be a directory."))))
 
+(defun filemeta:is-repo-p (dir)
+  (f-directory-p (concat dir filemeta:root-name)))
+
 (defun filemeta:root<-file (file)
   "It recursively searches upward for, and returns if any, the
   closest directory that contains \"filemeta\"."
@@ -31,9 +34,9 @@
                     (unless (equal file "/")
                       (let ((parent (f-parent file)))
                         (cons parent (parents parent))))))
-    (loop for d in (parents file)
-          when (f-directory-p (concat d "/" filemeta:root-name))
-          return d)))
+    (loop for dir in (parents file)
+          when (filemeta:is-repo-p (concat dir "/"))
+          return dir)))
 
 (defun filemeta:hash<-file (file)
   "If FILE is a regular file, return the md5sum for its content.
@@ -130,6 +133,10 @@ FILE to be a regular file."
     ;; Update plist and write to database.
     (plist-put! plist :history hist)
     (filemeta:write-attachment! plist file)))
+
+(defun filemeta:tags-in-repo (repo)
+  "TODO"
+  )
 
 ;;; testing
 
