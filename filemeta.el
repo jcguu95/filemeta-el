@@ -183,4 +183,7 @@ database."
 (loop for tag in '(nerdy techie)
       do (filemeta:-tag! tag filemeta:testfile))
 
+(filemeta:db-dump filemeta:testdir)
+(filemeta:hashes-in-repo filemeta:testdir)
+(filemeta:tags-in-repo filemeta:testdir)
 (filemeta:update-file-history! filemeta:testfile)
