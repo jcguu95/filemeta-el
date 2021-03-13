@@ -62,3 +62,4 @@ Below are some internals.
   easily.
 + [ ] Attachment editor: use lens/comonads, #'rm-attachment,
   #'cp-attachment.
++ [ ] Add a license.. which one?
