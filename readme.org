@@ -31,7 +31,7 @@ next. There are a few options.
 
 Below are some internals.
 
-** database
+** database (attachment)
 
 #+begin_src elisp
 ;; attachment
@@ -54,8 +54,9 @@ Below are some internals.
 
 * todo lists
 
-+ [ ] version control every thing
-+ [ ] syntactically abstract +tag/-tag by macros, for the users
-  to write functions for their own slots easily.
++ [ ] Version control everything in the database.
++ [ ] Syntactically abstract with macros +tag/-tag/fetch-tag..
+  etc, for the users to write functions for their own slots
+  easily.
 + [ ] Attachment editor: use lens/comonads, #'rm-attachment,
   #'cp-attachment.
