@@ -1,4 +1,7 @@
 ;; TODO under construction
+;;
+;; TODO basic ingredients are made.. now try to merge the old
+;; functions here.
 
 (require 'f)
 
