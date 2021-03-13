@@ -33,6 +33,7 @@ Below are some internals.
 
 ** database
 
+TODO - fix this part
 
 #+begin_src lisp
 ;; history
@@ -42,23 +43,16 @@ Below are some internals.
 (:tags (t1 t2 ..) :user-custom-slot-1 (u1 u2 ..))
 #+end_src
 
-** health check
-
-make sure there's no other =.filemeta= in a filemeta-repo.
-
 ** functions
 
-+ repo-root<-path
-+ relative-path<-path
-+ hash<-path
-+ attachment<-hash
-+ size<-path (huge file alert)
-
-+ tag-path
-+ update-hash-history (keep the latest time checked and the
-  latest time changed recursively)
-+ update-history (do it anytime a hash is computed)
-+ cp-attachment-to-hash
-+ rm-attachment
-
-+ all-tags-in-repo
++ [X] root<-file
++ [X] rel-path<-file
++ [X] hash<-file
++ [ ] size<-file (and huge file alert)
++ [X] +tag!, -tag!
++ [X] update-file-history!
++ [ ] attachment<-file
++ [ ] cp-attachment-to-hash
++ [ ] rm-attachment
++ [ ] all-tags-in-repo
++ [ ] version control every thing
