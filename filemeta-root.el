@@ -4,6 +4,17 @@
 
 (defvar filemeta-root-name ".filemeta")
 
+(defun filemeta-init (path)
+  "Make the filemeta database for the current directory PATH."
+  (let ((db (f-join path filemeta-root-name)))
+    (if (f-directory-p path)
+        (if (f-exists-p db)
+            (error "Init process fails because DB exists.")
+          (progn (mkdir db)
+                 (f-write-text (prin1-to-string (cons (ts-format) "Db init."))
+                               'utf-8 (f-join db "history"))))
+      (error "PATH must be a directory."))))
+
 (defun filemeta-wheres-root (path)
   "It recursively searches upward for, and returns if any, the
   closest directory that contains \"filemeta\"."
