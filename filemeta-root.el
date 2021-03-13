@@ -99,5 +99,13 @@ FILE."
       (filemeta-write-filemeta plist_ file))))
 
 ;;; testing
-(filemeta-add-tag-to-file 'bchh "~/testing/hi.txt")
-(filemeta-remove-tag-from-file 'bch "~/testing/hi.txt")
+
+(defvar filemeta-testdir "/tmp/filemeta/testing")
+(defvar filemeta-testfile (f-join filemeta-testdir "hello.txt"))
+(mkdir filemeta-testdir t)
+(filemeta-init filemeta-testdir)
+(f-write-text "" 'utf-8 filemeta-testfile)
+(loop for tag in '(math physics cs nerdy techie)
+      do (filemeta-add-tag-to-file tag filemeta-testfile))
+(loop for tag in '(nerdy techie)
+      do (filemeta-remove-tag-from-file tag filemeta-testfile))
