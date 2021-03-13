@@ -6,14 +6,14 @@
 
 (defvar filemeta:root-name ".filemeta")
 
-(defun filemeta:rel-path<-path (path)
-  (let ((root (filemeta:root<-path path)))
-    (concat "./" (f-relative path root))))
+(defun filemeta:rel-path<-file (reg-file)
+  (let ((root (filemeta:root<-file reg-file)))
+    (concat "./" (f-relative reg-file root))))
 
-(defun filemeta:init (path)
-  "Make the filemeta database for the current directory PATH."
-  (let ((db (f-join path filemeta:root-name)))
-    (if (f-directory-p path)
+(defun filemeta:init (dir)
+  "Make the filemeta database for the current directory DIR."
+  (let ((db (f-join dir filemeta:root-name)))
+    (if (f-directory-p dir)
         (if (f-exists-p db)
             (error "Init process fails because DB exists.")
           (progn (mkdir db)
@@ -21,22 +21,22 @@
                                 (list (ts-format) "Db init."))
                                'utf-8
                                (f-join db "history"))))
-      (error "PATH must be a directory."))))
+      (error "DIR must be a directory."))))
 
-(defun filemeta:root<-path (path)
+(defun filemeta:root<-file (file)
   "It recursively searches upward for, and returns if any, the
   closest directory that contains \"filemeta\"."
-  (labels ((parents (path)
-                    "Return the list of parents for PATH recursively"
-                    (unless (equal path "/")
-                      (let ((parent (f-parent path)))
+  (labels ((parents (file)
+                    "Return the list of parents for FILE recursively"
+                    (unless (equal file "/")
+                      (let ((parent (f-parent file)))
                         (cons parent (parents parent))))))
-    (loop for d in (parents path)
+    (loop for d in (parents file)
           when (f-directory-p (concat d "/" filemeta:root-name))
           return d)))
 
-(defun filemeta:hash<-path (path)
-  "If PATH is a regular file, return the md5sum for its content.
+(defun filemeta:hash<-file (file)
+  "If FILE is a regular file, return the md5sum for its content.
   Otherwise, return nil."
   (flet ((md5sum (file)
                  (with-demoted-errors "Error: %S" ;; TODO what does this do exactly?
@@ -44,23 +44,23 @@
                         (with-temp-buffer
                           (insert-file-contents file)
                           (md5 (buffer-string)))))))
-    (when (file-regular-p path)
-      (md5sum path))))
+    (when (file-regular-p file)
+      (md5sum file))))
 
-(defun filemeta:hashdir<-path (file)
+(defun filemeta:hashdir<-file (file)
   "Return the path to the filemeta for the hash of FILE."
-  (let ((hash (filemeta:hash<-path file))
-        (root (filemeta:root<-path file)))
+  (let ((hash (filemeta:hash<-file file))
+        (root (filemeta:root<-file file)))
     (f-join root filemeta:root-name hash)))
 
-(defun filemeta:hashfile<-path (file)
+(defun filemeta:hashfile<-file (file)
   "Return the path to the filemeta database for the hash of
 FILE."
-  (f-join (filemeta:hashdir<-path file) ".db.el"))
+  (f-join (filemeta:hashdir<-file file) ".db.el"))
 
-(defun filemeta:filemeta<-path (file)
+(defun filemeta:filemeta<-file (file)
   "Expect a plist in the hash-file for the hash of FILE."
-  (let ((hash-file (filemeta:hashfile<-path file)))
+  (let ((hash-file (filemeta:hashfile<-file file)))
     (ignore-errors                       ;; TODO fix this bad practice
         (with-temp-buffer
           (insert-file-contents hash-file)
@@ -70,8 +70,8 @@ FILE."
   "Write X to the hash-file of FILE."
   ;; TODO Reformat the plist to be written by a variant of
   ;; #'lispy-multiline before writing.
-  (let ((hash-dir (filemeta:hashdir<-path file))
-        (hash-file (filemeta:hashfile<-path file)))
+  (let ((hash-dir (filemeta:hashdir<-file file))
+        (hash-file (filemeta:hashfile<-file file)))
     (files--ensure-directory hash-dir)
     (f-write-text (prin1-to-string x)
                   'utf-8 hash-file)))
@@ -84,7 +84,7 @@ FILE."
     (error "TAG must be a symbol."))
   (flet ((sort+uniq (symbols)
                     (sort (-uniq symbols) #'string<)))
-    (let* ((plist (filemeta:filemeta<-path file))
+    (let* ((plist (filemeta:filemeta<-file file))
            (plist_ (plist-put plist     ;; TODO fix bad updating method..
                               :tag (sort+uniq
                                     (cons tag (plist-get plist :tag))))))
@@ -98,7 +98,7 @@ FILE."
     (error "TAG must be a symbol."))
   (flet ((sort+uniq (symbols)
                     (sort (-uniq symbols) #'string<)))
-    (let* ((plist (filemeta:filemeta<-path file))
+    (let* ((plist (filemeta:filemeta<-file file))
            (plist_ (plist-put plist ;; TODO fix bad updating method..
                               :tag (sort+uniq
                                     (-remove (lambda (x) (equal x tag))
@@ -107,12 +107,12 @@ FILE."
 
 ;;; hash history, relative path.. etc
 
-(defun filemeta:update-path-history! (path)
-  "Check and update the history of the hash of the PATH. Expect
-PATH to be a regular file."
-  (let* ((plist (filemeta:filemeta<-path path))
+(defun filemeta:update-file-history! (file)
+  "Check and update the history of the hash of the FILE. Expect
+FILE to be a regular file."
+  (let* ((plist (filemeta:filemeta<-file file))
          (hist (plist-get plist :history))
-         (rel-path (filemeta:rel-path<-path path))
+         (rel-path (filemeta:rel-path<-file file))
          (last-rel-path (-last-item (-last-item hist))))
     ;; Update history slot accordingly.
     (if (equal rel-path last-rel-path)
@@ -124,7 +124,7 @@ PATH to be a regular file."
                          `(,(list (ts-format) rel-path)))))
     ;; Update plist and write to database.
     (plist-put! plist :history hist)
-    (filemeta:write-filemeta! plist path)))
+    (filemeta:write-filemeta! plist file)))
 
 ;;; testing
 
@@ -138,4 +138,4 @@ PATH to be a regular file."
 (loop for tag in '(nerdy techie)
       do (filemeta:remove-tag-from-file! tag filemeta:testfile))
 
-(filemeta:update-path-history! filemeta:testfile)
+(filemeta:update-file-history! filemeta:testfile)
