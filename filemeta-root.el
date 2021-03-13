@@ -4,15 +4,15 @@
 
 (require 'f)
 
-(defvar filemeta-root-name ".filemeta")
+(defvar filemeta:root-name ".filemeta")
 
-(defun filemeta-relative-path (path)
-  (let ((root (filemeta-wheres-root path)))
+(defun filemeta:rel-path<-path (path)
+  (let ((root (filemeta:root<-path path)))
     (concat "./" (f-relative path root))))
 
-(defun filemeta-init (path)
+(defun filemeta:init (path)
   "Make the filemeta database for the current directory PATH."
-  (let ((db (f-join path filemeta-root-name)))
+  (let ((db (f-join path filemeta:root-name)))
     (if (f-directory-p path)
         (if (f-exists-p db)
             (error "Init process fails because DB exists.")
@@ -23,7 +23,7 @@
                                (f-join db "history"))))
       (error "PATH must be a directory."))))
 
-(defun filemeta-wheres-root (path)
+(defun filemeta:root<-path (path)
   "It recursively searches upward for, and returns if any, the
   closest directory that contains \"filemeta\"."
   (labels ((parents (path)
@@ -32,10 +32,10 @@
                       (let ((parent (f-parent path)))
                         (cons parent (parents parent))))))
     (loop for d in (parents path)
-          when (f-directory-p (concat d "/" filemeta-root-name))
+          when (f-directory-p (concat d "/" filemeta:root-name))
           return d)))
 
-(defun filemeta-path-hash (path)
+(defun filemeta:hash<-path (path)
   "If PATH is a regular file, return the md5sum for its content.
   Otherwise, return nil."
   (flet ((md5sum (file)
@@ -47,36 +47,36 @@
     (when (file-regular-p path)
       (md5sum path))))
 
-(defun filemeta-hash-dir (file)
+(defun filemeta:hashdir<-path (file)
   "Return the path to the filemeta for the hash of FILE."
-  (let ((hash (filemeta-path-hash file))
-        (root (filemeta-wheres-root file)))
-    (f-join root filemeta-root-name hash)))
+  (let ((hash (filemeta:hash<-path file))
+        (root (filemeta:root<-path file)))
+    (f-join root filemeta:root-name hash)))
 
-(defun filemeta-hash-file (file)
+(defun filemeta:hashfile<-path (file)
   "Return the path to the filemeta database for the hash of
 FILE."
-  (f-join (filemeta-hash-dir file) ".db.el"))
+  (f-join (filemeta:hashdir<-path file) ".db.el"))
 
-(defun filemeta-read-filemeta (file)
+(defun filemeta:filemeta<-path (file)
   "Expect a plist in the hash-file for the hash of FILE."
-  (let ((hash-file (filemeta-hash-file file)))
+  (let ((hash-file (filemeta:hashfile<-path file)))
     (ignore-errors                       ;; TODO fix this bad practice
         (with-temp-buffer
           (insert-file-contents hash-file)
           (read (buffer-string))))))
 
-(defun filemeta-write-filemeta (x file)
+(defun filemeta:write-filemeta! (x file)
   "Write X to the hash-file of FILE."
   ;; TODO Reformat the plist to be written by a variant of
   ;; #'lispy-multiline before writing.
-  (let ((hash-dir (filemeta-hash-dir file))
-        (hash-file (filemeta-hash-file file)))
+  (let ((hash-dir (filemeta:hashdir<-path file))
+        (hash-file (filemeta:hashfile<-path file)))
     (files--ensure-directory hash-dir)
     (f-write-text (prin1-to-string x)
                   'utf-8 hash-file)))
 
-(defun filemeta-add-tag-to-file (tag file)
+(defun filemeta:add-tag-to-file! (tag file)
   "Expect TAG to be a symbol. Remove all tags that equal to TAG
   in the filemeta of FILE,and write the updated filemeta to the
   hash-file for FILE."
@@ -84,13 +84,13 @@ FILE."
     (error "TAG must be a symbol."))
   (flet ((sort+uniq (symbols)
                     (sort (-uniq symbols) #'string<)))
-    (let* ((plist (filemeta-read-filemeta file))
+    (let* ((plist (filemeta:filemeta<-path file))
            (plist_ (plist-put plist     ;; TODO fix bad updating method..
                               :tag (sort+uniq
                                     (cons tag (plist-get plist :tag))))))
-      (filemeta-write-filemeta plist_ file))))
+      (filemeta:write-filemeta! plist_ file))))
 
-(defun filemeta-remove-tag-from-file (tag file)
+(defun filemeta:remove-tag-from-file! (tag file)
   "Expect TAG to be a symbol. Remove all tags that equal to TAG
   in the filemeta of FILE,and write the updated filemeta to the
   hash-file for FILE."
@@ -98,21 +98,21 @@ FILE."
     (error "TAG must be a symbol."))
   (flet ((sort+uniq (symbols)
                     (sort (-uniq symbols) #'string<)))
-    (let* ((plist (filemeta-read-filemeta file))
+    (let* ((plist (filemeta:filemeta<-path file))
            (plist_ (plist-put plist ;; TODO fix bad updating method..
                               :tag (sort+uniq
                                     (-remove (lambda (x) (equal x tag))
                                              (plist-get plist :tag))))))
-      (filemeta-write-filemeta plist_ file))))
+      (filemeta:write-filemeta! plist_ file))))
 
 ;;; hash history, relative path.. etc
 
-(defun filemeta-update-path-history (path)
+(defun filemeta:update-path-history! (path)
   "Check and update the history of the hash of the PATH. Expect
 PATH to be a regular file."
-  (let* ((plist (filemeta-read-filemeta path))
+  (let* ((plist (filemeta:filemeta<-path path))
          (hist (plist-get plist :history))
-         (rel-path (filemeta-relative-path path))
+         (rel-path (filemeta:rel-path<-path path))
          (last-rel-path (-last-item (-last-item hist))))
     ;; Update history slot accordingly.
     (if (equal rel-path last-rel-path)
@@ -122,21 +122,20 @@ PATH to be a regular file."
       ;; Otherwise, add a new entry to history.
       (setf hist (append hist
                          `(,(list (ts-format) rel-path)))))
-
     ;; Update plist and write to database.
     (plist-put! plist :history hist)
-    (filemeta-write-filemeta plist path)))
+    (filemeta:write-filemeta! plist path)))
 
 ;;; testing
 
-(defvar filemeta-testdir "/tmp/filemeta/testing")
-(defvar filemeta-testfile (f-join filemeta-testdir "hello.txt"))
-(mkdir filemeta-testdir t)
-(filemeta-init filemeta-testdir)
-(f-write-text "" 'utf-8 filemeta-testfile)
+(defvar filemeta:testdir "/tmp/filemeta/testing")
+(defvar filemeta:testfile (f-join filemeta:testdir "hello.txt"))
+(mkdir filemeta:testdir t)
+(filemeta:init filemeta:testdir)
+(f-write-text "" 'utf-8 filemeta:testfile)
 (loop for tag in '(math physics cs nerdy techie)
-      do (filemeta-add-tag-to-file tag filemeta-testfile))
+      do (filemeta:add-tag-to-file! tag filemeta:testfile))
 (loop for tag in '(nerdy techie)
-      do (filemeta-remove-tag-from-file tag filemeta-testfile))
+      do (filemeta:remove-tag-from-file! tag filemeta:testfile))
 
-(filemeta-update-path-history filemeta-testfile)
+(filemeta:update-path-history! filemeta:testfile)
