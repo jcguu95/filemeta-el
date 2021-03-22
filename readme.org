@@ -36,6 +36,33 @@ how to quickly tag files.
 + [ ] Add a license.. which one?
 + [ ] Think of a better way to =update-file-history!=.
 
+** another tag adding work flow?
+
+Sometimes I find it easier to batch add tags like the following.
+Abstract it for the users.
+
+#+begin_src elisp
+(let ((lst '(("file1" "tag1 tag2")
+             ("file2" "tag3 tag4"))))
+  (loop for file in (f-files "~/data/storage/recordings")
+        do (loop for tag in  (mapcar #'intern
+                                     (alist-get (f-base file)
+                                                lst nil nil #'string=))
+                 do (progn (filemeta:update-file-history! file)
+                           (filemeta:+tag! tag file)))))
+#+end_src
+
+** adding tags is very slow
+
+Could it be that it compute the hash every time for EACH tag? Fix
+this by remembering the last time the file is known to changed,
+and only check the hash if the time is different.
+
+** async process, and print progress
+
+The run above took me 10 minutes, and it freezes emacs without
+letting me know how much it has done.
+
 * functions
 
 + [X] root<-file
