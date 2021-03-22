@@ -1,5 +1,6 @@
 ;;; filemeta.el -mode -*- coding: utf-8; lexical-binding: t; -*-
 
+(add-to-list 'load-path (file-truename "."))
 (require 'f)
 (require 'filemeta-dired)
 (require 'filemeta-stats)
@@ -7,7 +8,7 @@
 
 (defvar filemeta:root-name ".filemeta")
 (defvar filemeta:hashfile-name ".db.el")
-(defvar filemeta:large-file-threshold 500000000) ;; ~500mb?
+(setq filemeta:large-file-threshold 5000000000) ;; set it right later
 
 (defun filemeta:rel-path<-file (reg-file)
   (let ((root (filemeta:root<-file reg-file)))
